@@ -209,6 +209,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       <label for="jacina" aria-hidden="true">Jačina zvukova</label>
       <input type="range" id="jacina" min="10" max="100" step="10" value="80" aria-label="Jačina zvukova">
       <div class="check"><input type="checkbox" id="vibracija" aria-label="Vibracija"><label for="vibracija" aria-hidden="true">Vibracija</label></div>
+      <div class="check"><input type="checkbox" id="fokusPoruka" aria-label="Posle reči prebaci fokus na poruku. Preporučeno za Jieshuo."><label for="fokusPoruka" aria-hidden="true">Posle reči prebaci fokus na poruku (preporučeno za Jieshuo)</label></div>
       <label for="izborNivoa">Idi na nivo</label>
       <div class="red">
         <select id="izborNivoa"></select>
@@ -693,8 +694,12 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     return true;
   }
 
+  // Rezultat provere: po podešavanju fokus ide na poruku (pouzdano za Jieshuo i slične čitače)
+  function javiRez(tekst, vrsta) { javi(tekst, vrsta, st.fokus !== false); }
+
   function proveri(unos) {
-    var w = (unos || "").normalize("NFC").trim().toLowerCase().replace(/\s+/g, "");
+    var javi = javiRez;
+    var w =(unos || "").normalize("NFC").trim().toLowerCase().replace(/\s+/g, "");
     if (!w) { javi("Prvo složi ili ukucaj reč."); return false; }
     if (nivoZavrsen()) { javi("Nivo je završen. Idi na sledeći nivo."); return false; }
     var L = NIVOI[st.lvl];
@@ -785,6 +790,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   }
 
   function pomoc() {
+    var javi = javiRez;
     if (nivoZavrsen()) { javi("Nivo je završen."); return; }
     if (st.hints <= 0) {
       zvuk("greska");
@@ -860,6 +866,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   $("dalje").addEventListener("click", sledeciNivo);
   $("zvuk").addEventListener("change", function (e) { st.sound = e.target.checked; sacuvaj(); });
   $("vibracija").addEventListener("change", function (e) { st.vib = e.target.checked; sacuvaj(); });
+  $("fokusPoruka").checked = st.fokus !== false;
+  $("fokusPoruka").addEventListener("change", function (e) { st.fokus = e.target.checked; sacuvaj(); });
   $("jacina").value = typeof st.vol === "number" ? st.vol : 80;
   $("jacina").setAttribute("aria-valuetext", $("jacina").value + " posto");
   $("jacina").addEventListener("input", function (e) {
