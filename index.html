@@ -116,7 +116,8 @@ input[type="text"], select {
 details { background: var(--surface); border-radius: 10px; border: 2px solid var(--line); padding: 4px 14px; }
 summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
 details > div { display: flex; flex-direction: column; gap: 14px; padding-block: 8px 14px; }
-.check { display: flex; align-items: center; gap: 12px; font-weight: 400; min-height: 48px; }
+.check { display: flex; align-items: center; gap: 12px; min-height: 48px; }
+.check label { font-weight: 400; }
 .check input { width: 28px; height: 28px; accent-color: var(--accent); }
 input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent); }
 .poruka:focus { outline: 4px solid var(--accent); outline-offset: 3px; }
@@ -204,10 +205,10 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   <details>
     <summary>Podešavanja</summary>
     <div>
-      <label class="check"><input type="checkbox" id="zvuk"> Zvukovi</label>
-      <label for="jacina">Jačina zvukova</label>
-      <input type="range" id="jacina" min="10" max="100" step="10" value="80">
-      <label class="check"><input type="checkbox" id="vibracija"> Vibracija</label>
+      <div class="check"><input type="checkbox" id="zvuk" aria-label="Zvukovi"><label for="zvuk" aria-hidden="true">Zvukovi</label></div>
+      <label for="jacina" aria-hidden="true">Jačina zvukova</label>
+      <input type="range" id="jacina" min="10" max="100" step="10" value="80" aria-label="Jačina zvukova">
+      <div class="check"><input type="checkbox" id="vibracija" aria-label="Vibracija"><label for="vibracija" aria-hidden="true">Vibracija</label></div>
       <label for="izborNivoa">Idi na nivo</label>
       <div class="red">
         <select id="izborNivoa"></select>
