@@ -145,15 +145,15 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   <div id="najava1" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
   <div id="najava2" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
-  <div class="red">
-    <button type="button" id="gdeSam">Gde sam?</button>
-    <button type="button" id="ponoviSlova">Ponovi slova</button>
-  </div>
-
   <div id="kraj" class="kraj" hidden>
     <h2 id="krajNaslov" tabindex="-1">Nivo završen!</h2>
     <p id="krajTekst"></p>
     <button type="button" id="dalje" class="glavno">Sledeći nivo</button>
+  </div>
+
+  <div class="red">
+    <button type="button" id="gdeSam">Gde sam?</button>
+    <button type="button" id="ponoviSlova">Ponovi slova</button>
   </div>
 
   <section aria-labelledby="hSlova">
@@ -492,7 +492,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     var ova = $(naizmenicno ? "najava1" : "najava2");
     var ona = $(naizmenicno ? "najava2" : "najava1");
     ona.textContent = "";
-    tajmer = setTimeout(function () { ova.textContent = tekst; }, 100);
+    ova.textContent = "";
+    // Malo sačekaj da se ekran smiri (spisak reči, polje za kucanje), pa tek onda pošalji poruku čitaču
+    tajmer = setTimeout(function () { ova.textContent = tekst; }, 300);
   }
 
   // ---------- nivo ----------
@@ -746,8 +748,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     zvuk("kraj"); vibriraj([100, 50, 100, 50, 220]);
     prikaziSve();
     var poruka = (poslednjaRec ? "Tačno! " + poslednjaRec + ". " : "") + $("krajNaslov").textContent + " " + $("krajTekst").textContent;
-    javi(poruka, "dobro");
-    setTimeout(function () { $("dalje").focus(); }, 120);
+    javi(poruka + " Dugme za sledeći nivo je odmah ispod.", "dobro", true);
   }
 
   function sledeciNivo() {
@@ -810,16 +811,17 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     var r = trenutnaRec();
     if (!r.length) { javi("Prvo dodaj slova u reč."); return; }
     var w = r.join("");
-    var ok = proveri(w);
-    if (ok || !nivoZavrsen()) { izabrano = []; prikaziSlova(); prikaziRec(); }
+    izabrano = []; prikaziSlova(); prikaziRec();
+    proveri(w);
   });
   $("obrisi").addEventListener("click", obrisiSlovo);
   $("ponisti").addEventListener("click", function () { ponisti(false); });
   $("forma").addEventListener("submit", function (e) {
     e.preventDefault();
     var polje = $("unos");
-    proveri(polje.value);
+    var w = polje.value;
     polje.value = "";
+    proveri(w);
     if (!nivoZavrsen()) polje.focus();
   });
   $("ponoviSlova").addEventListener("click", function () {
