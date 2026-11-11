@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17244d">
-<meta name="description" content="PristupaÄŤna igra reÄŤi na srpskom za ÄŤitaÄŤe ekrana.">
+<meta name="description" content="Pristupačna igra reči na srpskom za čitače ekrana.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="ikona-192.png">
 <link rel="apple-touch-icon" href="ikona-192.png">
@@ -195,7 +195,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       <p>Od ponuđenih slova složi sve skrivene reči. Svaka reč ima najmanje 3 slova. U jednoj reči svako slovo možeš da upotrebiš samo jednom.</p>
       <p>Dodirom: dvaput dodirni slovo i ono se dodaje u reč. Kad složiš reč, dodirni dugme „Potvrdi reč”. Pogrešno slovo skidaš dugmetom „Obriši slovo”.</p>
       <p>Kucanjem: upiši reč u polje i potvrdi. Kvačice nisu obavezne, pa se „kuca” priznaje kao „kuća”.</p>
-      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svaku bonus reč i za svaki završen nivo. Bonus reči su prave reči od istih slova koje nisu među skrivenima.</p>
+      <p>Bonus reči su sve druge prave reči od istih slova, u bilo kom obliku: padeži, množina, glagolski oblici. Igra ih prepoznaje pomoću srpskog rečnika.</p>
+      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svake 3 bonus reči i za svaki završen nivo.</p>
       <p>Dugme „Gde sam?” kaže nivo, koliko je reči pronađeno i koliko ti je pomoći ostalo.</p>
     </div>
   </details>
@@ -233,7 +234,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     { s: "kućar", w: ["rak", "ćuk", "ćar", "ruka", "kuća"], b: [] },
     { s: "domak", w: ["dom", "kod", "dok", "kad", "mak", "moda"], b: ["oda"] },
     { s: "trava", w: ["rat", "tava", "trava", "vrata", "vatra"], b: ["vara", "atar", "rata"] },
-    { s: "mleko", w: ["lek", "kome", "meko", "mleko"], b: ["kel", "mol", "mole", "mek", "kole"] },
+    { s: "mleko", w: ["lek", "kome", "meko", "mleko"], b: ["mol", "mole", "mek"] },
     { s: "nebos", w: ["nos", "bes", "obe", "seno", "nebo"], b: ["nose", "sen"] },
     { s: "škola", w: ["šal", "koš", "šok", "kola", "lako", "škola"], b: ["lak", "kal"] },
     { s: "slati", w: ["sat", "sit", "sila", "list", "lista", "slati"], b: ["sita", "ista", "tas", "tisa", "ali"] },
@@ -269,9 +270,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     { s: "jagoda", w: ["jad", "jod", "jagoda"], b: ["oda", "gad"] },
     { s: "malina", w: ["ima", "lan", "mali", "mina", "nama", "lama", "malina"], b: ["mila", "mala", "nam"] },
     { s: "lisica", w: ["ali", "lica", "sila", "lisica"], b: [] },
-    { s: "olovka", w: ["lov", "vol", "oko", "kolo", "kola", "lako", "olovka"], b: ["vola"] },
+    { s: "olovka", w: ["lov", "oko", "kolo", "kola", "lako", "olovka"], b: ["vola"] },
     { s: "sveska", w: ["sve", "sva", "vas", "vek", "kesa", "sveska"], b: ["sav", "seka"] },
-    { s: "leptir", w: ["lep", "rep", "tip", "pir", "pet", "tri", "leptir"], b: ["liter"] },
+    { s: "leptir", w: ["lep", "rep", "tip", "pir", "pet", "tri", "leptir"], b: [] },
     { s: "pesnik", w: ["sin", "kip", "pesnik"], b: [] },
     { s: "gitara", w: ["rat", "igra", "trag", "gitara"], b: [] },
     { s: "azbuka", w: ["baka", "buka", "baza", "azbuka"], b: ["zuba"] },
@@ -299,6 +300,78 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     { s: "biblioteka", w: ["lik", "lek", "bok", "biti", "bilo", "belo", "telo", "beba", "boli", "bitka", "etika", "koliba", "kobila", "biblioteka"], b: ["tek", "kilo", "beli"] },
     { s: "pripovetka", w: ["tok", "kip", "trik", "pivo", "pero", "pirat", "papir", "opera", "pravo", "preko", "petak", "vetar", "okret", "pokret", "pevati", "kopati", "pripovetka"], b: ["rep", "rak", "rat", "era", "kapi", "tip", "pita"] }
   ];
+
+  // Sve prave reči od slova svakog nivoa, iz srpskog rečnika (popunjava ih skripta recnik.ps1)
+  /*RECNIK-POCETAK*/var RECNIK = {"sok":"",
+"reka":"kare kera rake",
+"kućar":"aru karu kraću kruća kura raku ćurak ćurka",
+"domak":"adom ako dam damo dao doka doma domak kado kadom kam kamo kao koda kom koma komad mod moka odam odmak oka oma",
+"trava":"ara arta ata tara tvar var vat vata vrat vrt vrta",
+"mleko":"kleo klo kom leko lekom lem lom lome melo mleo moke oke ome",
+"nebos":"beno beo besno beso bone bose eno eon neo neos nes neso one ose seo sne sneo snob snobe sob sobe sobne sone",
+"škola":"ako alko kalo kao kašo klao klo koša loš loša oka šako šoa šoka",
+"slati":"lasti lat lati lis lisa lita sali sati slat stali stil stila tali tila tis tla",
+"pasti":"apsi pasi pat pati pis pisa psa psi sapi sati sip sipa spati tap tis",
+"vodar":"aro dao daro drao dvora oda odra ora rod roda rova rvao var vorda vrda vrdao",
+"grado":"ago agro aro dao daro drao droga gar gardo god goda gord gorda gra gro oda odra ogar ora rago rod roga",
+"proleće":"lepre ler leće lope opere opre orle pele pelo peo perle peć peće pleo pol pole poleće pore prele preo repe repo rol role ćele ćelo ćere ćero",
+"leto":"eto let lot lote tel tle tole",
+"mačka":"akam kam kama maka mač mača mačak čama",
+"petak":"akt akte ate eta kape kep kepa pak paket pakt pakte pat pate patke peta petka tap teka tepa tka",
+"patka":"akt akta apa ata atak kata pak paka pakt pakta pat pata patak taka tap tapa tka",
+"mesto":"eto etos meto moste ome oset osme otme sem seo seto setom sme smeo smet smo som some stem stome temo tom",
+"kamen":"akne ame amen ekam kam kame kane makne mek mekan nam neam nek neka",
+"sveća":"ase save saće sev seva seća već veća",
+"torba":"aro bar baro bat bato boa bot bota brao oba obra obrat obrt obrta ora orta rab rato roba tabor tao toba tora trba",
+"grana":"aga ara gana gar gara gra naga nara raga ranga",
+"lopta":"apo atol lat lot lota opa opat palo pao plato plota pot pota tao tap tla topa topla",
+"snaga":"aga gana gasa gasna sag sana sna",
+"kolač":"ako alko kalo kao klao klo oka",
+"ptica":"pat pati pica tap tipa",
+"pesma":"ame apse ase mape pase pasem psa pse same sape sem sme",
+"kosti":"iko istok kist kit kito kosi kot osi sito skit skot stik stoik stok tik tis tiso",
+"slika":"alki kasi kil kila klas klasi laki lika lis lisa liska sali sika ska skali slak slik",
+"golub":"blog blogu bogu bol bolu globu golu lob lobu log logu oblu obu ubo ubog ulog",
+"pčela":"apel pale pače pela peča plače čepa",
+"roman":"arno aro arom mano marno maron nam narom norma oma oman ona ora oran orma orman orna rano ranom",
+"ormar":"aro arom oma ora orma",
+"jabuka":"aba baj baja bajk bajka bajku baju baku bau bauk bauka buja buk jaku jauk jauka kaj kaju kuba kuj uja ujak ujaka ujka",
+"kruška":"aru kaku karu kašu krak kraku kraš krašu krka krkaš kruka krš krša kršu kuk kukaš kura raku uška šaku šar šarku šaru šura šurak",
+"zvezda":"dve vade vaze zade zeva zeza",
+"pekara":"akra akrep apa ara arak arap arape kapar kapare kape kare kep kepa kera krep krepa krpa krpe pak paka paker pakera par park parka pekar pre prek preka rake rapa rape repa repka",
+"livada":"ala alav alavi ali alva alvi dala davali davi davila dila div diva iva lada lav lavi liva vadi vadila val vala vali vid vida vidala vlada vladi",
+"jagoda":"aga ago ajao daj dao gada gaj gaja gajda god goda goja jada jadao jado jaga jago jao joda joga odaj odaja odgaja",
+"malina":"ala ali alin alina amal amali aman amani amin amina anal anali anima imala iman imana lami lani lim lima liman malan mana mani manila mlin mlina naima nali nil",
+"lisica":"alici ili laici lasici lii lis lisa lisac lisca sali sica sili slici",
+"olovka":"ako alko alov alvo kal kalo kao kavo klao klo kov kova kovao kva lak lav lavo lokao lokva lova lovo oka okov okova olako olova ova ovako oval ovo val vlak vokal",
+"sveska":"ase kase kave keva kva kvas kvase sase save seks seksa sev seva ska skvase svak svake veka",
+"leptir":"epir etil lepi lepri ler let leti lipe lire litre peli peri perli pert pertli peti petli pile pire pite pleti pre preli preti pri prte prti reli repi reptil rit tel teli ter tile tipe tir tle tripe triple trpe trpeli trpi",
+"pesnik":"epik epski ine kep kesi kine kipe kise kisne nek neki nepi nes nesi niske peni penis pik pine pis piske pisne pse psi psine seki seni senik senki sike sine sinke sip sipe sipke sken skine sne snek spin spine",
+"gitara":"aga agi ara arta ata atar atari gar gara gari gat gata gatar gatari gati gira git gita gra igara raga ragi rata rati riga rit taga tara tari tigar tigra tir traga trg trga tri",
+"azbuka":"aba baku bau bauk bauka bazu bazuka buk kaza kuba ukaz ukaza uza uzak zub zuk zuka",
+"utorak":"ako akt aktu aortu aro artu aru atu auro aut auto autor kao kart karto kartu karu katu kor koru kot kota kotar kotaru kotu kotur kotura krao krta krto krut kruta kruto kura kurat kut kuta oka oku ora oraku orka orku orta ortak ortaku ortu oru otaru otka otku rako raku rato ratu rkao roka roku rtu ruka ruko ruta tako taku tao taru tka tkao toka toku tora torak toru trak trako traku trka trkao trku truo tuk tuka tukao tuko tur turao turka turo ukora ukrao urok uroka urota utka utkao utoka utor utora utorka utrka utro",
+"subota":"asu atu aut auto bas basu bat bato batu bau boa bosa bosu bot bota botu bus busa but buta oba obasut obu osta osu osut satu sob sobu stao stuba tabu tao tas tasu toba ubo usta ustao",
+"magarac":"aga agama amara ara arama gaca gacam gama gar gara gra grac graca grama grca grcam grm grma maga magarca raca raga",
+"stablo":"atol balo bat bato blast boa bol bola bosa bot bota laso lasto lat lob loba los losa lot lota oba obla oblast osta salo salto slabo slao slat slot slota sob soba sol sola stalo stol stola tablo tao tla toba",
+"abeceda":"aba baca bace bada bade bede cede dece",
+"čitanka":"akan akita akna akni akt akta akti anti antika antička ata atak atika inat inata inč inča kana kani kant kanta kanti kata katani kati kači kina kinta kit kita kič kiča nakači nakit nakita natka tain taina taka takni tank tanka tanki tač tačan tački tačna tačni tik tika tka tkan tkana tkani tkač tkača tkači čanak čanka čata čik čika čikana čin čina čita čitak čitan čitana čitka",
+"zastava":"ata sata sav sava sazva staza sva svat svata tasa vas vat vata zasta",
+"planina":"ala ali alin alina alpi anal anali analni apa lani nali nanali nani napa napali napi napila napni nil nin pali pana pilana pina plana plani plin plina",
+"violina":"ali alin alini alino alov alovi alvi alvo avion avioni ini ino iona ioni iva ivin ivina ivo lani lanovi lavi lavini lavo lii lini lio liva lov lova lovan lovani lovi lovina lovini lovna nali nalio naliv navi navili navio nil nivo nivoa nivoi nov oliva olivi olivin olivina ova oval ovalni ovan ovi ovna val vali valni van vani vanili vii vili vilina vilino vilo vina vini vinil vinila viola violi vola volan volani voli volina",
+"devojka":"ajde ako daj daje dao deko deo devo dje djeva djevo dojave doje dojka dojke doka dovek doveka dve dvoj dvoja dvoje dvojka dvojke ekaj ekao evo jad jade jado jake jao jave jeda jedak jeko jeo jod joda jode jok joka joke jova jove kade kado kaj kaje kao kave kavo kej keja keva koda kode koja koje kov kova kove kva odaj odaje ode odeva odjave odje odjek odjeka ojed ojeda ojka oka okaj okaje oke okej ovdje ove ovej vade vaj vajde vej vejao veka veo vjek vjeka vode vojak",
+"sloboda":"balo boa bod boda bol bola bolo bosa dalo dao daso dobo dola laso lob loba loboda los losa oba obad obalo obla oblo obo oboa obod oboda obol obola odalo odao oslo oso sad saldo salo slabo slad slao sob sobo soda sodo sol sola solo",
+"ogrlica":"agi ago agori agro algi algo aro car cigar ciglo cio coli gali galio gar gari gic gica gico gira giro gloc gol gola goli golica gori gorica gorila gra grac graci grca grcao gric gril grila grli grlica grlio gro iglo igralo igrao igro lacio lagi largo ligo lio lira loca locira log loga oca oci ogar ora orali orila orla raci ragi rago rali ralo riga rigao rila rilo roga rol rola rolci roli",
+"stolica":"atol atoli cio cista cisto coli lacio laso lasti lasto lat lati latio lio lis lisa lisac lisca listao listo lita loca los losa lot lota oca ocat oci octa osi osica osta ostaci ostali sali salio salo salto sati sica silo slao slat slio slot slota sol sola soli stalci stali stalio stalo sticao stil stila stilo stoci stol stola stolac stolca stolci tali talio tao taoc taoci ticalo ticao tila tis tiso tla toci tocila toli",
+"lektira":"akite akril akt akte akter akteri akti alert ali alke alki alter artikl artikle ate ekali ekati eta etar etika etil etra ikra ikre kal kale kare kareti kart karteli karti kati kelt kera kil kila kiler kilera kilt kilta kir kire kit kita kite klate klati klera klet kleta kleti klir klit klita klite krale krate krati kretali kri kril krilate krile krit krta krte krti laik laike lake laki lat late lati leka lekar lekari leki ler lera let leta leti letka lika like liker likera likra likre lire lita litra litre rake raketi raki rali rate rati rekla rekli reli relikt retka retki rika rike rila rit takle takli tale tali talir tare tari teka teki tekli tel tela teli ter tera terali tik tika tila tile tir tka tkale tkali tla tle trak trake tri trka trkali trke",
+"rečenica":"arene areni car care carine cener cenera ceni cera cere ceri cin ciča ciče crn crnče crnči crče ene era erina erine inače ine inč inča inče nare nariče nače nec neca nera nerc nerca nereci nica niče race raci rance ranci rane rani ranice ranč rače račice reci recne recni rena reni rečen rečena rečeni reči rečica rečice rečna rečne rečni rine riče čari čarni čena čene čina čine čir čira",
+"kalendar":"aden akan akane akna akne akra ala aldan alka alkan alkar alke anal anale andrak anker ankera ara arad arak aral arkade arkadne dakar dakle dala dale dalek daleka dan dana danak dane danka danke dara darak dare darka deka dekan dekana del dela denar denara dera derala deran derana dlaka dlake dlana dna drala drale dreka dren drena ekala ekrana elan elana era kade kadra kadre kal kala kalan kale kalenda kana kanale kanda kandela kane kara karale karan karane kardan kare karne kedar kedra keln ker kera klada klade klan klana klane klen klena klera knedla krade kraden kradena krala krale krana krane krda lada laka lake lakne lanad lanak landa lane lanka lanke leda ledara lek leka lekar lekara ler lera nad nada nadale nade nadera nadra nakla naklade nara narade nard narda nare neala neda nedara nek neka nekad nekada nela nera nerad nerada rada radan rade radena radna radne raka rake rala rane ranka reala realan realna reda redak redaka redan redna reka rekla rena renda rendala",
+"četvrtak":"akt akte akter ate avet era eta etar etra evra kare kart karteč kave kače kera keva keč krate krave krače kreč kreča krta krte krv krve krče kva kvar kvare kvartet kvače rak rake rate rače račve reka retka reva reč rvač rvače rvačke rve takt takve tare tat tate tatre tave tač tače tačke teka ter tera tetak tetka teča tka tkač trak trake trakt trate trave travke trač trka trkate trkač trkače trke trta trte trčak trče trčka tvar tvrtka tvrtke var vare varke vat vate vatre veka vera veta vetra vrate vrač vrt vrta vrtače vrte vrč vrča čakre čarke čavke ček čeka čet četka četvrta četvrtka čvarke",
+"drugarica":"acid acida acidu adira adu aga agi agu ara arad aru aura auri cara caru cigar cigaru cirada ciradu cug cuga cugi cura curi dara darci dari daru dira drag draga dragi dragu drugar drugara drugari drugi dug dugi dur dura duri gaca gad gada gadi gadu gadura gaduri gar gara gardi gardu gari garu gaur gaura gauri gic gica gicu gira giru gra grac graca graci gracu grada gradi gradica gradu grca grdi gric grr gru grudi grudica gudi gura guri idu igara igru raca raci rada radar radari radaru radi radu raga ragi ragua rida riga ruci rudar rudara rudari rudi ruga uda udara udarac udarca udarci udari udica ugarci ugradi uradi urar urara urgira uri",
+"kišobran":"akni ako akron ariš arno aro aršin baki bakin bakino bako ban bank banko bar bario bariš barki barko baro barok barokni baroni baš baši bašo bika bina bino bio bir bira biran birano birao biraš birka biro biroa boa boi boin boina bok boka bona bori borik boriš borka borna borni bran brani branik branio braniš brano branši brao braon brašno brašo brik brika brk brka brkao brkaš brki brko brno broš broša iako iko ikona ikra ino inok iona išao kaiš kani kanio kaniš kano kao karbon karboni karino karni karoi karon karoni kaši kašo kina kir kiša kišan kišna kišno kišo kniš kob koban kobi kobiš kobna kobni kobri kor kori koriš koša košari krabi krabin krabo krao kraš kri krin krina krio krišan krišna krš krša kršan krši kršina kršio kršna kršni nabi nabio nabo nabor nabori narko naš naši našio naški nikao niko niš niša niška nokšir nokšira noša noši oba obari obi obira obra obrani obraniš obri obrni oka okani okaniš okna ona oni ora oran oriba oriban oribaš oriš orka orkan orkani orki orkin orna orni rab rabi rabin rabio rabiš raboš rak raki rako rani ranio raniš ranko raonik raši rašio ribao ribaš ribon ribona rika rikao rikša rino riška rkao roba roban robi robna robni roka rokaš rokni roni roniš roša roši šako šani šank šar šari šarki šarko šarni šiba šiban šibao šibo šik šika šino šio širan širo široka šnir šoa šoka šokira šokiran šor šora šori šorka šorni",
+"pozorište":"epir eto izeo izopšte izotop izotope izoštre ište išto operi opi opio opire opireš opit opite opiše opor opore opori opre oprez opri opro opšte opšti opštio ore oreš orio orite oriš oriše oro oroz oteo otire otop otope otopi otopiš otpio otpiše otpor otpore otpre otri otro otrpeo otrpi otrpiš oštre oštri oštrio oštro peo peri periš pert peti peto petoro peš peši pešo pio pire pite pito piš pišo pište poet poeti poore pore porezi pori poro porote poroti port porte porti porto pot pote poteri potezi potire poto potre potro potroše potroši poze pozer pozeri pozi pozo pozori poši pošio pošize pošizeo pošte pošti pošto pre preo preti pretio pretiš preši prešo pri prišt protezi protezo proti proto proze prozi proši prošio prte prti pršte pršti repi repo rez rezi rezo reš reši rešio rešo rit rizoto riše roze rozeti rozo roše roši ter tezi teši tešio tipe tir tiše top tope topi topio topiš tor tore torio torzo treš trio tripe triše trop trope tropi troše troši trošio trpe trpeo trpezi trpi trpio trpiš zet zip zoo zore zori zort zreo šepi šerpi šio šire širo šit šite šize šizeo šop šor šore šori šort šoto šper šporet šporeti štep štip štoper",
+"gramatika":"aga agama agi akam akata akita akra akt akta akti aktima amara amiga ara arak araka arama arima arta ata atak ataka atar atari atika gaka gakati gama gami gar gara gari gat gata gatam gatar gatara gatari gati gira git gita gitara gitarama gra grama grami grka grm grma grmi igara igram igrama ikra ima kam kama kamara kamari kamatar kamatari kamati kami kara karam karama karat karata karati karatima karga karma karmi kart kartam kartama karti kata katar katara katari kati kim kima kir kit kita kitama kitara krati kratim kri krim krit krmi krta krti maga mak maka makar makara makari maraka marki mart mat mata mati matira mig miga mir mira mit mita mitra mraka mrka mrki raga ragi raka rakama raki rakita rama rata ratama rati riga rigam rika rim rit ritama ritma taga taka tami tara taraka tari tigra tik tika tim tima tir tka tkam traga tragam trak traka trakama trg trga trgam tri trim trima trka trkam trkama",
+"biblioteka":"akite akiti akito ako akt akte akti ali alibi alke alki alko ate atol atoli babe babi babo bake bakelit baki bako bal bale balet bali balio balo balote bat bate bati batke batli bato bebi bek bela belka belko beo beta bik bika bil bila bile bilet bili bio bit bita bitak bite bitke bitki blate blati blatio blato ble bleka blob blok bloka boa boi boka bokal bokale bokali bol bola bole boleti bot bota bote ekali ekao ekati eliti elito eta etil eto iako iko ili italik kabel kabeli kabl kal kale kalio kaliti kalo kao kati kebab kebabi kelt kibe kibi kibla kible kil kila kili kilote kilt kilta kit kita kite kiti kitila kitio kito klao klate klati klatio kleo klet kleta kleti klit klita klite klo klot koale koali kob kobalt kobe kobi kobile kobili kola kolati koleba kolebati koleta koli kolibe kolibi kolt kolta kolte kot kota kote koti kotile kotla labok laik laike lak lake laki lako lakote lakoti lat late lati latio leka leki leko let leta letak leti letio letka leto libe libek libio libite lii lika like liki liko lio lita liti lob loba lobe lobi lokati lot lota lote oba obale obali obe obeli obi obila obilat obile obili obiti obla oblak oblake oblati oble obli oblik oblika oblike obliti oka okale okali okati oke okite okiti okitila otekla otekli otela oteli otka tabeli table tabli tablo takle takli taklo tako tale tali talio tao tebi teka tekao teki tekila tekili tekli teklo teko tel tela teli tiba tibe tibi tibo tik tika tikalo tila tile tili tka tkale tkali tkao tla tle tlo toba tok toka toke tole toli tolika tolike toliki",
+"pripovetka":"akite akito ako akrep akt akte akter akteri akti aktiv aktive aktove aktovi aorte aorti apo aport aro ate avet aveti ekao ekati ekipa ekvator epik epika epir epova epovi eta etapi etar etika eto etra evo evra evri evro evropa iako iko ikra ikre ipak iva ive iver ivera iverak iverka ivo kao kap kape kapo kapoe kapoi kare kareti karoi kart karte karti karto kati katove katovi kave kavi kavo kep kepa ker kera kero keva kevi kipa kipar kipe kiper kipera kipova kipove kipte kipteo kir kire kit kita kite kito kitov kitova kitove kop kopa kopate kope koper kopir kopira kopirate kopita kopitar kopite kopriva koprive kor kora kore kori korita korite korpa korpe korpi korveta korveti kot kota kotar kote koti kotira kotva kotve kov kova kovati kove koverat koverta koverti kovit kovita krao krate krati krave kravi kravo krep krepa krepao krepati krepi kretao kri krio kripta kripte kripto krit kriv kriva krive krivo kroti krov krova krpa krpao krpati krpe krpi krpio krpite krpo krta krte krti krto krv krve krvi kva kvar kvare kvari kvario kvarite kvart kvit kvota kvote kvoti oka okapi okati oke oker okera okite okiva okrepi okreta okreti okrive okrpi oktave oktavi okvir okvira okvire opa opak opake opaki opare opari opat opate opati opeka operi opet opeva opevati opi opip opipa opipate opire opit opita opite opra oprati oprave opravi opravite opravke opravki opre opri optika optike ora orati ore orite orka orke orki orta ortak ortake otare otave otavi otera otire otka otkravi otkri otkriva otpeva otpravi otpre otprve otri otrpi ova ove overa overi ovi pak paker pakeri paket paketi pakove pakovi pakt pakte paktove paktovi pao paok paor paori pape papire papke papo paprike par pare parei pari pario parip parite park parket parkove parkovi paro parove parovi parti pat pate pater pati patike patiko patio patke patki patko patove pekao pekar pekari peo pepita pepito pera peri perika periko pert pet peta petao peti petka peto petorka petorki peva pevao pik pika pikao pikap piket piketa pikova pikove pio pipa pipak pipao pipate pipav pipave pipavo pipe pipeta pipka pipkao pipkate pipke pipo pir pira pirate pire pirea pirka pirova pitak pitao pite pitka pitke pitko pito piva pivar pivare pivot pivota poet poeta poeti poetika poker pokera pokreta pokreti pokri pokriva pokrivate pokvare pokvari pokvarite pop popa pope popet popeti popi popke poprave popravi popravite popravke popravki poprek pora pore poretka pori poriv poriva porive port porta porte porti pot pota pote potera poteri potire potka potki potkiva potkrepi potre poveri povi povik povika povike povrat povrate povrati povratke povre prao prate prati pratio prato prav prave pravi pravio pravite pre prek preka preki prekopa prekopati preo prepao prepatio prepi prepio preti pretio pretka pretopi previ previo pri prika prike priko pripao pritekao pritka pritke pritoka pritoke priveo propate propati propeva propevati protek proti protiv protive prpa prte prti prva prvak prvake prve prvi prvo rake raketi raketo raki rako rape rate rati rato ratove ratovi reka rekao reko repa repati repi repka repo repova repovati repovi retka retki retko reva rika rikao rike ripa rit ritao riva rive rkao rok roka rokate rokati rotkva rotkve rov rova rovati rove rovit rovita rovka rvao rvati rve tako takove takovi takve takvi takvo tao tap tapioke tapir tare tari tave tavi tavo tavori tek teka tekao teki teko tepa tepao ter tera terao tik tika tikova tikove tikva tikve tikvo tipa tipe tipka tipkao tipke tipov tipova tipove tir tka tkao tkiva tkivo toka toke top topa tope topi topika topike tor tora torak tore tov tova tovar tovare tovari tove tovi trak trake trako trap trapove trapovi trave travi travke travki travo tri triko trikoa trikoe trikova trikove trio tripa tripe tripova tripove trka trkao trke trop tropa trope tropi trova trpa trpao trpe trpeo trpi trpio tvar tvari tvor tvora tvore tvori vape vapi vapio vapor var vare vari vario varite varke varki vat vate vati vato vatre vatri vatro vek veka vektor vektora vektori veo vepar vepra vera verao verati veri verio vero veta veto vetra vetri vika vikao vikar vikare vike viko vir vira vire vireo vit vita vitak vite vitka vitke vitko vito vitro voki votka votke votki vrat vrate vrati vratio vreo vreti vri vrio vrt vrta vrte vrteo vrti vrtio"};/*RECNIK-KRAJ*/
 
   // Provera nivoa: izbaci reč koja ne može da se složi od slova nivoa (da greška u spisku ne pokvari igru)
   NIVOI.forEach(function (L) {
@@ -611,7 +684,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     if (!w) { javi("Prvo složi ili ukucaj reč."); return false; }
     if (nivoZavrsen()) { javi("Nivo je završen. Idi na sledeći nivo."); return false; }
     var L = NIVOI[st.lvl];
-    var sve = reci.concat(L.b);
+    var izRecnika = (RECNIK[L.s] || "").split(" ").filter(Boolean);
+    var sve = reci.concat(L.b, izRecnika);
     var pogodak = null;
     if (sve.indexOf(w) >= 0) pogodak = w;
     else {
@@ -648,12 +722,18 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       return true;
     }
 
+    // Svake 3 bonus reči donose jednu pomoć
     st.bonus.push(pogodak);
-    st.hints += 1;
+    st.bp = (st.bp || 0) + 1;
+    var nova = st.bp % 3 === 0;
+    if (nova) st.hints += 1;
     sacuvaj();
     zvuk("bonus"); vibriraj([30, 40, 30, 40, 60]);
     prikaziSve();
-    javi("Bonus reč: " + pogodak + "! Dobijaš jednu pomoć. Imaš " + brPomoci(st.hints) + ".", "dobro");
+    var jos = 3 - (st.bp % 3);
+    javi("Bonus reč: " + pogodak + "! " + (nova
+      ? "Dobijaš jednu pomoć. Imaš " + brPomoci(st.hints) + "."
+      : "Još " + jos + " do nove pomoći."), "dobro");
     return true;
   }
 
@@ -686,7 +766,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     if (nivoZavrsen()) { javi("Nivo je završen."); return; }
     if (st.hints <= 0) {
       zvuk("greska");
-      javi("Nemaš više pomoći. Pomoć dobijaš za bonus reči i za završen nivo.", "lose");
+      javi("Nemaš više pomoći. Pomoć dobijaš za svake 3 bonus reči i za završen nivo.", "lose");
       return;
     }
     var cilj = reci.filter(function (w) { return st.found.indexOf(w) < 0; })[0];
