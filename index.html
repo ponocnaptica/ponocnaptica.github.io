@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17244d">
+<meta name="description" content="PristupaÄŤna igra reÄŤi na srpskom za ÄŤitaÄŤe ekrana.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="ikona-192.png">
+<link rel="apple-touch-icon" href="ikona-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style><title>Složi reč</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Raspored: jedna kolona, krupna dugmad, redosled prilagođen prevlačenju prstom sa TalkBack-om */
+:root {
+  --bg: #eef1f8;
+  --surface: #ffffff;
+  --fg: #0f1730;
+  --muted: #47526e;
+  --accent: #1e47c8;
+  --tile: #17244d;
+  --tile-fg: #ffd54a;
+  --line: #c9d0e2;
+  --good: #17733f;
+  --bad: #ad2a1f;
+  --font: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0f1e; --surface: #141b31; --fg: #f1f3fa; --muted: #aeb7cf; --accent: #ffd54a;
+    --tile: #ffd54a; --tile-fg: #0a0f1e; --line: #2d3757; --good: #66d695; --bad: #ff8f85;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a0f1e; --surface: #141b31; --fg: #f1f3fa; --muted: #aeb7cf; --accent: #ffd54a;
+  --tile: #ffd54a; --tile-fg: #0a0f1e; --line: #2d3757; --good: #66d695; --bad: #ff8f85;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font); font-size: 1.125rem; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 48px;
+}
+main { max-width: 34rem; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2 { margin: 0; line-height: 1.2; text-wrap: balance; }
+h1 { font-size: 2rem; letter-spacing: 0.01em; }
+h2 { font-size: 1.25rem; }
+p { margin: 0; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+header { display: flex; flex-direction: column; gap: 4px; }
+.nivo { color: var(--muted); font-variant-numeric: tabular-nums; }
+.poruka {
+  min-height: 3.2em; padding: 12px 14px; border-radius: 10px;
+  background: var(--surface); border: 2px solid var(--line); font-weight: 700;
+}
+.poruka.dobro { border-color: var(--good); color: var(--good); }
+.poruka.lose { border-color: var(--bad); color: var(--bad); }
+section { display: flex; flex-direction: column; gap: 12px; }
+[tabindex="-1"]:focus { outline: none; }
+.slova { display: grid; grid-template-columns: repeat(var(--kolone, 4), minmax(0, 1fr)); gap: 10px; }
+.plocica {
+  min-height: 76px; border-radius: 14px; border: 3px solid var(--tile);
+  background: var(--tile); color: var(--tile-fg);
+  font-family: var(--font); font-size: 2.2rem; font-weight: 700; cursor: pointer;
+}
+.plocica[aria-disabled="true"] {
+  background: transparent; color: var(--muted); border-style: dashed; border-color: var(--line);
+}
+.rec {
+  font-size: 1.75rem; font-weight: 700; letter-spacing: 0.25em; min-height: 1.6em;
+  padding: 8px 14px; background: var(--surface); border-radius: 10px; border: 2px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.rec .prazno { font-size: 1.1rem; letter-spacing: 0; font-weight: 400; color: var(--muted); }
+.red { display: flex; flex-wrap: wrap; gap: 10px; }
+button, .dugme {
+  font-family: var(--font); font-size: 1.1rem; font-weight: 700;
+  min-height: 52px; padding: 10px 18px; border-radius: 10px; cursor: pointer;
+  border: 2px solid var(--fg); background: var(--surface); color: var(--fg);
+}
+button.glavno { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 4px solid var(--accent); outline-offset: 3px;
+}
+.red button { flex: 1 1 9rem; }
+form { display: flex; flex-wrap: wrap; gap: 10px; }
+label { font-weight: 700; }
+input[type="text"], select {
+  flex: 1 1 12rem; min-height: 52px; font-family: var(--font); font-size: 1.4rem;
+  padding: 8px 12px; border-radius: 10px; border: 2px solid var(--fg);
+  background: var(--surface); color: var(--fg);
+}
+.reci { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.reci li {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--surface); border-radius: 10px; border: 2px solid var(--line);
+}
+.reci li.nadjena { border-color: var(--good); }
+.kutije { display: flex; gap: 6px; flex-wrap: wrap; }
+.kutije span {
+  width: 2.1rem; height: 2.4rem; display: grid; place-items: center;
+  border-bottom: 3px solid var(--muted); font-size: 1.4rem; font-weight: 700;
+}
+.reci li.nadjena .kutije span { border-color: var(--good); color: var(--good); }
+.bonus { color: var(--muted); }
+details { background: var(--surface); border-radius: 10px; border: 2px solid var(--line); padding: 4px 14px; }
+summary { min-height: 48px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
+details > div { display: flex; flex-direction: column; gap: 14px; padding-block: 8px 14px; }
+.check { display: flex; align-items: center; gap: 12px; font-weight: 400; min-height: 48px; }
+.check input { width: 28px; height: 28px; accent-color: var(--accent); }
+input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent); }
+.poruka:focus { outline: 4px solid var(--accent); outline-offset: 3px; }
+.uputstvo p { max-width: 65ch; }
+.kraj {
+  padding: 18px; border-radius: 14px; border: 3px solid var(--good); background: var(--surface);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.kraj h2 { color: var(--good); font-size: 1.6rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .plocica { transition: transform 0.08s ease; }
+  .plocica:active { transform: scale(0.94); }
+}
+</style>
+
+</head>
+<body>
+<main>
+  <header>
+    <h1>Složi reč</h1>
+    <p class="nivo" id="nivoInfo">Nivo 1</p>
+  </header>
+
+  <div id="poruka" class="poruka" tabindex="-1">Dobro došli! Složi skrivene reči od ponuđenih slova.</div>
+  <div id="najava1" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+  <div id="najava2" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <div class="red">
+    <button type="button" id="gdeSam">Gde sam?</button>
+    <button type="button" id="ponoviSlova">Ponovi slova</button>
+  </div>
+
+  <div id="kraj" class="kraj" hidden>
+    <h2 id="krajNaslov" tabindex="-1">Nivo završen!</h2>
+    <p id="krajTekst"></p>
+    <button type="button" id="dalje" class="glavno">Sledeći nivo</button>
+  </div>
+
+  <section aria-labelledby="hSlova">
+    <h2 id="hSlova" tabindex="-1">Slova</h2>
+    <div id="slova" class="slova" role="group" aria-labelledby="hSlova"></div>
+    <p id="rec" class="rec"></p>
+    <div class="red">
+      <button type="button" id="potvrdi" class="glavno">Potvrdi reč</button>
+      <button type="button" id="obrisi">Obriši slovo</button>
+      <button type="button" id="ponisti">Poništi reč</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="hKucaj">
+    <h2 id="hKucaj">Ili ukucaj reč</h2>
+    <form id="forma" autocomplete="off">
+      <label for="unos" class="sr-only">Ukucaj reč</label>
+      <input type="text" id="unos" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="ukucaj reč">
+      <button type="submit" class="glavno">Proveri</button>
+    </form>
+  </section>
+
+  <section aria-labelledby="hReci">
+    <h2 id="hReci">Skrivene reči</h2>
+    <ul id="reci" class="reci"></ul>
+    <p id="bonus" class="bonus"></p>
+  </section>
+
+  <section aria-labelledby="hAlatke">
+    <h2 id="hAlatke">Alatke</h2>
+    <div class="red">
+      <button type="button" id="promesaj">Promešaj slova</button>
+      <button type="button" id="pomoc">Pomoć: otkrij slovo</button>
+    </div>
+  </section>
+
+  <details>
+    <summary>Uputstvo</summary>
+    <div class="uputstvo">
+      <p>Od ponuđenih slova složi sve skrivene reči. Svaka reč ima najmanje 3 slova. U jednoj reči svako slovo možeš da upotrebiš samo jednom.</p>
+      <p>Dodirom: dvaput dodirni slovo i ono se dodaje u reč. Kad složiš reč, dodirni dugme „Potvrdi reč”. Pogrešno slovo skidaš dugmetom „Obriši slovo”.</p>
+      <p>Kucanjem: upiši reč u polje i potvrdi. Kvačice nisu obavezne, pa se „kuca” priznaje kao „kuća”.</p>
+      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svaku bonus reč i za svaki završen nivo. Bonus reči su prave reči od istih slova koje nisu među skrivenima.</p>
+      <p>Dugme „Gde sam?” kaže nivo, koliko je reči pronađeno i koliko ti je pomoći ostalo.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Podešavanja</summary>
+    <div>
+      <label class="check"><input type="checkbox" id="zvuk"> Zvukovi</label>
+      <label for="jacina">Jačina zvukova</label>
+      <input type="range" id="jacina" min="10" max="100" step="10" value="80">
+      <label class="check"><input type="checkbox" id="vibracija"> Vibracija</label>
+      <label for="izborNivoa">Idi na nivo</label>
+      <div class="red">
+        <select id="izborNivoa"></select>
+        <button type="button" id="idiNivo">Idi</button>
+      </div>
+      <button type="button" id="resetuj">Obriši sav napredak</button>
+      <div id="potvrdaReset" class="red" hidden>
+        <p>Sigurno? Brišu se svi pređeni nivoi i pomoći.</p>
+        <button type="button" id="resetDa">Da, obriši</button>
+        <button type="button" id="resetNe">Odustani</button>
+      </div>
+    </div>
+  </details>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // s: slova nivoa, w: skrivene reči, b: bonus reči
+  var NIVOI = [
+    { s: "sok", w: ["sok", "kos"], b: [] },
+    { s: "reka", w: ["rak", "era", "reka"], b: ["ker"] },
+    { s: "kućar", w: ["rak", "ćuk", "ćar", "ruka", "kuća"], b: [] },
+    { s: "domak", w: ["dom", "kod", "dok", "kad", "mak", "moda"], b: ["oda"] },
+    { s: "trava", w: ["rat", "tava", "trava", "vrata", "vatra"], b: ["vara", "atar", "rata"] },
+    { s: "mleko", w: ["lek", "kome", "meko", "mleko"], b: ["kel", "mol", "mole", "mek", "kole"] },
+    { s: "nebos", w: ["nos", "bes", "obe", "seno", "nebo"], b: ["nose", "sen"] },
+    { s: "škola", w: ["šal", "koš", "šok", "kola", "lako", "škola"], b: ["lak", "kal"] },
+    { s: "slati", w: ["sat", "sit", "sila", "list", "lista", "slati"], b: ["sita", "ista", "tas", "tisa", "ali"] },
+    { s: "pasti", w: ["pas", "sat", "sit", "tip", "pita", "pista", "pasti"], b: ["ista", "tas", "sita", "tipa", "tisa"] },
+    { s: "vodar", w: ["dar", "rad", "rov", "dva", "rado", "voda", "dvor", "drva", "drvo"], b: ["vod", "ova", "odar"] },
+    { s: "grado", w: ["rad", "dar", "rog", "grad", "rado", "roda", "gora", "drago"], b: ["gad", "odar", "drag"] },
+    { s: "proleće", w: ["lep", "rep", "pero", "lepo", "proleće"], b: ["pre", "pere", "lepe", "ore"] },
+    { s: "leto", w: ["tlo", "leto", "telo"], b: [] },
+    { s: "mačka", w: ["mak", "čak", "mačka"], b: [] },
+    { s: "petak", w: ["pet", "kap", "petak"], b: ["tek"] },
+    { s: "patka", w: ["kap", "kapa", "patka"], b: ["tapka"] },
+    { s: "mesto", w: ["set", "sto", "most", "meso", "mesto"], b: ["ste", "ose", "tome"] },
+    { s: "kamen", w: ["mak", "nema", "mena", "kamen"], b: ["mane", "meka"] },
+    { s: "sveća", w: ["sve", "vas", "sva", "sveća"], b: ["sav"] },
+    { s: "torba", w: ["rat", "rob", "bor", "bora", "brat", "torba"], b: ["tor"] },
+    { s: "grana", w: ["nar", "rana", "rang", "grana"], b: [] },
+    { s: "lopta", w: ["pol", "top", "tlo", "pola", "lopta"], b: ["plot", "pat", "opal"] },
+    { s: "snaga", w: ["gas", "san", "nas", "saga", "snaga"], b: ["naga"] },
+    { s: "kolač", w: ["lak", "čak", "kola", "lako", "kolač"], b: ["kal"] },
+    { s: "ptica", w: ["tip", "pita", "ptica"], b: [] },
+    { s: "pesma", w: ["pas", "sam", "pesma"], b: ["mesa", "mase"] },
+    { s: "kosti", w: ["sok", "kos", "tok", "sto", "sit", "isto", "kost", "kosti"], b: ["koti"] },
+    { s: "slika", w: ["lik", "lak", "sila", "slika"], b: ["ali", "kal", "laik"] },
+    { s: "golub", w: ["gol", "lug", "bog", "golub"], b: [] },
+    { s: "pčela", w: ["lep", "čep", "lepa", "plač", "pčela"], b: ["čela"] },
+    { s: "roman", w: ["ram", "nar", "mora", "roman"], b: [] },
+    { s: "ormar", w: ["ram", "mora", "ormar"], b: [] },
+    { s: "jabuka", w: ["jak", "baka", "buka", "jabuka"], b: ["jaka", "kuja"] },
+    { s: "kruška", w: ["rak", "ruka", "kuka", "kruška"], b: ["kuša"] },
+    { s: "zvezda", w: ["vez", "dva", "veza", "deva", "zvezda"], b: ["zev"] },
+    { s: "pekara", w: ["kap", "rep", "rak", "kapa", "para", "reka", "pekara"], b: ["ker", "era", "kara", "pare", "pera", "raka"] },
+    { s: "livada", w: ["dva", "vila", "lava", "livada"], b: ["dali"] },
+    { s: "jagoda", w: ["jad", "jod", "jagoda"], b: ["oda", "gad"] },
+    { s: "malina", w: ["ima", "lan", "mali", "mina", "nama", "lama", "malina"], b: ["mila", "mala", "nam"] },
+    { s: "lisica", w: ["ali", "lica", "sila", "lisica"], b: [] },
+    { s: "olovka", w: ["lov", "vol", "oko", "kolo", "kola", "lako", "olovka"], b: ["vola"] },
+    { s: "sveska", w: ["sve", "sva", "vas", "vek", "kesa", "sveska"], b: ["sav", "seka"] },
+    { s: "leptir", w: ["lep", "rep", "tip", "pir", "pet", "tri", "leptir"], b: ["liter"] },
+    { s: "pesnik", w: ["sin", "kip", "pesnik"], b: [] },
+    { s: "gitara", w: ["rat", "igra", "trag", "gitara"], b: [] },
+    { s: "azbuka", w: ["baka", "buka", "baza", "azbuka"], b: ["zuba"] },
+    { s: "utorak", w: ["rok", "tok", "rak", "rat", "kora", "ukor", "utorak"], b: ["tura", "tor"] },
+    { s: "subota", w: ["sto", "sat", "osa", "soba", "stub", "subota"], b: ["tuba", "bos"] },
+    { s: "magarac", w: ["car", "ram", "mag", "gram", "magarac"], b: ["maca", "cara", "rama"] },
+    { s: "stablo", w: ["sat", "sto", "tlo", "osa", "bal", "slab", "stao", "blato", "stablo"], b: ["tas", "bas"] },
+    { s: "abeceda", w: ["deca", "beda", "abeceda"], b: [] },
+    { s: "čitanka", w: ["nit", "čak", "tanak", "tačka", "čitanka"], b: [] },
+    { s: "zastava", w: ["sat", "stav", "tava", "vaza", "zastava"], b: ["tas", "stava"] },
+    { s: "planina", w: ["lan", "plan", "pila", "lipa", "nana", "planina"], b: ["pala", "lana"] },
+    { s: "violina", w: ["lav", "lan", "oni", "ona", "ili", "vino", "vila", "novi", "violina"], b: ["nova", "vilin"] },
+    { s: "devojka", w: ["kod", "dok", "jak", "vek", "dva", "deka", "deva", "voda", "jako", "jeka", "ovaj", "ovde", "jedva", "devojka"], b: ["kad", "oda", "vod", "ova"] },
+    { s: "sloboda", w: ["osa", "oda", "bal", "slab", "soba", "doba", "osoba", "sloboda"], b: ["bas", "boso", "dol"] },
+    { s: "ogrlica", w: ["rog", "ali", "igra", "igla", "liga", "gora", "grlo", "lica", "cigla", "ogrlica"], b: ["grla"] },
+    { s: "stolica", w: ["sto", "tlo", "sit", "osa", "list", "sila", "lica", "sito", "isto", "stao", "otac", "lista", "slati", "stolica"], b: ["sat", "tas", "ista", "sita", "tisa", "ali"] },
+    { s: "lektira", w: ["lik", "lek", "rat", "era", "lira", "reka", "trik", "litar", "letak", "lektira"], b: ["lak", "tek", "rak", "ker", "karte", "krila", "kartel", "tekila"] },
+    { s: "rečenica", w: ["reč", "čin", "čar", "cena", "crna", "rečenica"], b: ["reče", "cene", "crne", "crni", "nar"] },
+    { s: "kalendar", w: ["led", "red", "dar", "lan", "dlan", "kada", "kreda", "ekran", "arena", "kanal", "kalendar"], b: ["rak", "lak", "rad", "kad", "nar", "rana", "kadar", "kran", "nedra"] },
+    { s: "četvrtak", w: ["vek", "rat", "čar", "čak", "vrat", "teta", "vetar", "četvrt", "četvrtak"], b: ["tek", "četa", "kvart", "ker", "karte"] },
+    { s: "drugarica", w: ["rad", "dar", "car", "drug", "duga", "grad", "igra", "ruda", "udar", "gruda", "cigara", "drugarica"], b: ["druga", "garda"] },
+    { s: "kišobran", w: ["bik", "rok", "šok", "koš", "bor", "rob", "riba", "brak", "kora", "rano", "kino", "šina", "kobra", "širok", "kišobran"], b: ["bora", "nar", "baron", "šira", "kran"] },
+    { s: "pozorište", w: ["pet", "rep", "tri", "pir", "što", "pero", "opet", "potez", "porez", "pozor", "pozorište"], b: ["tip", "piše"] },
+    { s: "gramatika", w: ["rat", "rak", "ram", "mag", "trag", "gram", "igra", "mrak", "rima", "tama", "trik", "ritam", "tigar", "karta", "marka", "kamata", "gramatika"], b: ["krma"] },
+    { s: "biblioteka", w: ["lik", "lek", "bok", "biti", "bilo", "belo", "telo", "beba", "boli", "bitka", "etika", "koliba", "kobila", "biblioteka"], b: ["tek", "kilo", "beli"] },
+    { s: "pripovetka", w: ["tok", "kip", "trik", "pivo", "pero", "pirat", "papir", "opera", "pravo", "preko", "petak", "vetar", "okret", "pokret", "pevati", "kopati", "pripovetka"], b: ["rep", "rak", "rat", "era", "kapi", "tip", "pita"] }
+  ];
+
+  // Provera nivoa: izbaci reč koja ne može da se složi od slova nivoa (da greška u spisku ne pokvari igru)
+  NIVOI.forEach(function (L) {
+    var izvor = Array.from(L.s.normalize("NFC"));
+    function ok(w) {
+      var ost = izvor.slice();
+      return Array.from(w.normalize("NFC")).every(function (c) { var k = ost.indexOf(c); if (k < 0) return false; ost.splice(k, 1); return true; });
+    }
+    var losi = L.w.concat(L.b).filter(function (w) { return !ok(w); });
+    if (losi.length) console.warn("Nivo " + L.s + ": reči koje ne mogu da se slože: " + losi.join(", "));
+    var dupli = L.w.concat(L.b).filter(function (w, i, a) { return a.indexOf(w) !== i; });
+    if (dupli.length) console.warn("Nivo " + L.s + ": duplirane reči: " + dupli.join(", "));
+    L.w = L.w.filter(ok);
+    L.b = L.b.filter(function (w) { return ok(w) && L.w.indexOf(w) < 0; });
+  });
+  // Od lakših ka težim: prvo po broju slova, pa po broju skrivenih reči
+  NIVOI = NIVOI.map(function (L, i) { return { L: L, i: i }; }).sort(function (a, b) {
+    return Array.from(a.L.s).length - Array.from(b.L.s).length || a.L.w.length - b.L.w.length || a.i - b.i;
+  }).map(function (x) { return x.L; });
+
+  var KLJUC = "slozi-rec-v1";
+  var st = ucitaj();
+  var izabrano = []; // indeksi slova u nizu "slova"
+  var slova = [];
+  var reci = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  function novoStanje() {
+    return { lvl: 0, max: 0, hints: 3, sound: true, vib: true, found: [], bonus: [], rev: {}, order: null };
+  }
+  function ucitaj() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KLJUC));
+      if (s && typeof s.lvl === "number" && s.lvl < NIVOI.length) return s;
+    } catch (e) {}
+    return novoStanje();
+  }
+  function sacuvaj() {
+    try { localStorage.setItem(KLJUC, JSON.stringify(st)); } catch (e) {}
+  }
+
+  // Srpska množina: 1 reč, 2 reči, 5 reči
+  function oblik(n, jedan, dva, pet) {
+    var d = n % 10, s = n % 100;
+    if (d === 1 && s !== 11) return jedan;
+    if (d >= 2 && d <= 4 && (s < 12 || s > 14)) return dva;
+    return pet;
+  }
+  function brReci(n) { return n + " " + oblik(n, "reč", "reči", "reči"); }
+  function brSlova(n) { return n + " " + oblik(n, "slovo", "slova", "slova"); }
+  function brPomoci(n) { return n + " " + oblik(n, "pomoć", "pomoći", "pomoći"); }
+
+  function bezKvacica(w) {
+    return w.replace(/đ/g, "dj").replace(/[čć]/g, "c").replace(/š/g, "s").replace(/ž/g, "z");
+  }
+  function sriceno(nizSlova) { return nizSlova.join(", "); }
+
+  // ---------- zvuk i vibracija ----------
+  var ac = null, glavni = null;
+  function pripremiZvuk() {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    var komp = ac.createDynamicsCompressor();
+    komp.threshold.value = -12; komp.knee.value = 6; komp.ratio.value = 4;
+    glavni = ac.createGain();
+    glavni.connect(komp); komp.connect(ac.destination);
+  }
+  function ton(f, pocetak, trajanje, tip, jacina) {
+    var o = ac.createOscillator(), g = ac.createGain();
+    var t = ac.currentTime + pocetak;
+    o.type = tip || "sine"; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(jacina || 0.18, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + trajanje);
+    o.connect(g); g.connect(glavni);
+    o.start(t); o.stop(t + trajanje + 0.05);
+  }
+  function zvuk(vrsta) {
+    if (!st.sound) return;
+    try {
+      if (!ac) pripremiZvuk();
+      if (ac.state === "suspended") ac.resume();
+      var jacina = typeof st.vol === "number" ? st.vol : 80;
+      glavni.gain.value = (jacina / 100) * 3.5;
+      if (vrsta === "slovo") ton(660, 0, 0.07, "sine", 0.08);
+      else if (vrsta === "brisi") ton(420, 0, 0.07, "sine", 0.08);
+      else if (vrsta === "tacno") { ton(523, 0, 0.18); ton(659, 0.1, 0.18); ton(784, 0.2, 0.3); }
+      else if (vrsta === "bonus") { ton(784, 0, 0.15); ton(988, 0.09, 0.15); ton(1319, 0.18, 0.3, "triangle"); }
+      else if (vrsta === "greska") { ton(220, 0, 0.16, "square", 0.07); ton(165, 0.14, 0.22, "square", 0.07); }
+      else if (vrsta === "vec") { ton(440, 0, 0.1); ton(440, 0.16, 0.1); }
+      else if (vrsta === "pomoc") { ton(587, 0, 0.12, "triangle"); ton(880, 0.1, 0.2, "triangle"); }
+      else if (vrsta === "mesaj") { ton(500, 0, 0.05, "triangle", 0.08); ton(620, 0.06, 0.05, "triangle", 0.08); ton(740, 0.12, 0.05, "triangle", 0.08); }
+      else if (vrsta === "kraj") { ton(523, 0, 0.2); ton(659, 0.15, 0.2); ton(784, 0.3, 0.2); ton(1047, 0.45, 0.6, "triangle", 0.2); }
+    } catch (e) {}
+  }
+  function vibriraj(obrazac) {
+    if (!st.vib) return;
+    try { if (navigator.vibrate) navigator.vibrate(obrazac); } catch (e) {}
+  }
+
+  // ---------- poruke za čitač ekrana ----------
+  // Vidljiva poruka + dve skrivene "žive" oblasti koje se smenjuju, da TalkBack pouzdano izgovori svaku poruku
+  var tajmer = null, naizmenicno = false;
+  function javi(tekst, vrsta, fokus) {
+    var el = $("poruka");
+    el.className = "poruka" + (vrsta ? " " + vrsta : "");
+    el.textContent = tekst;
+    clearTimeout(tajmer);
+    if (fokus) {
+      // Duže informacije: fokus ide na poruku, pa je čitač sigurno pročita
+      $("najava1").textContent = ""; $("najava2").textContent = "";
+      el.blur();
+      setTimeout(function () { el.focus(); }, 50);
+      return;
+    }
+    naizmenicno = !naizmenicno;
+    var ova = $(naizmenicno ? "najava1" : "najava2");
+    var ona = $(naizmenicno ? "najava2" : "najava1");
+    ona.textContent = "";
+    tajmer = setTimeout(function () { ova.textContent = tekst; }, 100);
+  }
+
+  // ---------- nivo ----------
+  function promesaj(niz) {
+    var a = niz.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function napraviRed() {
+    var red = promesaj(slova.map(function (_, i) { return i; }));
+    // da slova ne stoje redom kao najduža reč
+    if (red.every(function (v, i) { return v === i; }) && red.length > 1) red.reverse();
+    return red;
+  }
+
+  function pokreniNivo(novi) {
+    var L = NIVOI[st.lvl];
+    slova = Array.from(L.s.normalize("NFC"));
+    reci = L.w.slice().sort(function (a, b) { return Array.from(a).length - Array.from(b).length || a.localeCompare(b, "sr"); });
+    if (novi || !st.order || st.order.length !== slova.length) {
+      st.found = []; st.bonus = []; st.rev = {}; st.order = napraviRed();
+    }
+    izabrano = [];
+    sacuvaj();
+    prikaziSve();
+  }
+
+  function nivoZavrsen() { return reci.every(function (w) { return st.found.indexOf(w) >= 0; }); }
+
+  // ---------- prikaz ----------
+  function prikaziSve() {
+    $("nivoInfo").textContent = "Nivo " + (st.lvl + 1) + " od " + NIVOI.length + " · " + brPomoci(st.hints);
+    prikaziSlova(); prikaziRec(); prikaziReci(); prikaziIzbor();
+    $("pomoc").textContent = "Pomoć: otkrij slovo (" + st.hints + ")";
+    $("zvuk").checked = !!st.sound;
+    $("vibracija").checked = !!st.vib;
+    var gotovo = nivoZavrsen();
+    $("kraj").hidden = !gotovo;
+    if (gotovo) prikaziKraj();
+  }
+
+  function prikaziSlova() {
+    var box = $("slova");
+    var kljuc = st.lvl + ":" + st.order.join(",");
+    // Dugmad se prave samo kad se promeni nivo ili raspored, da fokus čitača ekrana ostane na slovu
+    if (box.dataset.kljuc !== kljuc) {
+      box.dataset.kljuc = kljuc;
+      box.innerHTML = "";
+      var n = slova.length;
+      box.style.setProperty("--kolone", n <= 5 ? n : Math.ceil(n / 2));
+      st.order.forEach(function (idx) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "plocica";
+        b.dataset.idx = idx;
+        var vid = document.createElement("span");
+        vid.setAttribute("aria-hidden", "true");
+        vid.textContent = slova[idx].toUpperCase();
+        var sr = document.createElement("span");
+        sr.className = "sr-only";
+        b.appendChild(vid); b.appendChild(sr);
+        b.addEventListener("click", function () { dodajSlovo(idx); });
+        box.appendChild(b);
+      });
+    }
+    Array.prototype.forEach.call(box.children, function (b) {
+      var idx = +b.dataset.idx;
+      var upotrebljeno = izabrano.indexOf(idx) >= 0;
+      if (upotrebljeno) b.setAttribute("aria-disabled", "true");
+      else b.removeAttribute("aria-disabled");
+      b.lastChild.textContent = slova[idx] + (upotrebljeno ? ", već u reči" : "");
+    });
+  }
+
+  function trenutnaRec() { return izabrano.map(function (i) { return slova[i]; }); }
+
+  function prikaziRec() {
+    var el = $("rec");
+    var r = trenutnaRec();
+    if (!r.length) {
+      el.innerHTML = '<span class="prazno">Tvoja reč je prazna.</span>';
+    } else {
+      el.innerHTML = "";
+      var sr = document.createElement("span");
+      sr.className = "sr-only";
+      sr.textContent = "Tvoja reč: " + sriceno(r);
+      var vid = document.createElement("span");
+      vid.setAttribute("aria-hidden", "true");
+      vid.textContent = r.join("").toUpperCase();
+      el.appendChild(sr); el.appendChild(vid);
+    }
+  }
+
+  function prikaziReci() {
+    var ul = $("reci");
+    ul.innerHTML = "";
+    reci.forEach(function (w, n) {
+      var s = Array.from(w);
+      var nadjena = st.found.indexOf(w) >= 0;
+      var otkriveno = nadjena ? s.length : (st.rev[w] || 0);
+      var li = document.createElement("li");
+      if (nadjena) li.className = "nadjena";
+      var sr = document.createElement("span");
+      sr.className = "sr-only";
+      var opis = "Reč " + (n + 1) + ": ";
+      if (nadjena) opis += w + ". Pronađena.";
+      else {
+        opis += brSlova(s.length) + ", nije pronađena.";
+        if (otkriveno) opis += " Počinje sa: " + sriceno(s.slice(0, otkriveno)) + ".";
+      }
+      sr.textContent = opis;
+      var kutije = document.createElement("span");
+      kutije.className = "kutije";
+      kutije.setAttribute("aria-hidden", "true");
+      s.forEach(function (c, i) {
+        var k = document.createElement("span");
+        k.textContent = i < otkriveno ? c.toUpperCase() : "";
+        kutije.appendChild(k);
+      });
+      li.appendChild(sr); li.appendChild(kutije);
+      ul.appendChild(li);
+    });
+    $("bonus").textContent = st.bonus.length
+      ? "Bonus reči: " + st.bonus.join(", ") + "."
+      : "Bonus reči: još nijedna.";
+  }
+
+  function prikaziIzbor() {
+    var sel = $("izborNivoa");
+    sel.innerHTML = "";
+    for (var i = 0; i <= Math.min(st.max, NIVOI.length - 1); i++) {
+      var o = document.createElement("option");
+      o.value = i; o.textContent = "Nivo " + (i + 1);
+      if (i === st.lvl) o.selected = true;
+      sel.appendChild(o);
+    }
+  }
+
+  function prikaziKraj() {
+    var poslednji = st.lvl >= NIVOI.length - 1;
+    $("krajNaslov").textContent = poslednji ? "Svi nivoi su pređeni!" : "Nivo " + (st.lvl + 1) + " završen!";
+    $("krajTekst").textContent = poslednji
+      ? "Bravo! Uskoro stižu novi nivoi. Možeš da igraš ponovo od početka."
+      : "Bravo! Dobijaš jednu pomoć. Sada imaš " + brPomoci(st.hints) + ".";
+    $("dalje").textContent = poslednji ? "Igraj ponovo od početka" : "Sledeći nivo";
+  }
+
+  // ---------- radnje ----------
+  function dodajSlovo(idx) {
+    if (nivoZavrsen()) { javi("Nivo je završen. Idi na sledeći nivo."); return; }
+    if (izabrano.indexOf(idx) >= 0) {
+      javi("Slovo " + slova[idx] + " je već u reči. Tvoja reč: " + sriceno(trenutnaRec()));
+      return;
+    }
+    izabrano.push(idx);
+    zvuk("slovo"); vibriraj(15);
+    prikaziSlova(); prikaziRec();
+    javi(slova[idx] + ". Reč: " + sriceno(trenutnaRec()));
+  }
+
+  function obrisiSlovo() {
+    if (!izabrano.length) { javi("Reč je već prazna."); return; }
+    var i = izabrano.pop();
+    zvuk("brisi");
+    prikaziSlova(); prikaziRec();
+    javi("Obrisano " + slova[i] + ". " + (izabrano.length ? "Reč: " + sriceno(trenutnaRec()) : "Reč je prazna."));
+  }
+
+  function ponisti(tiho) {
+    izabrano = [];
+    prikaziSlova(); prikaziRec();
+    if (!tiho) javi("Reč je poništena.");
+  }
+
+  function mozeOdSlova(nizSlova, izvor) {
+    var ostalo = izvor.slice();
+    for (var i = 0; i < nizSlova.length; i++) {
+      var k = ostalo.indexOf(nizSlova[i]);
+      if (k < 0) return false;
+      ostalo.splice(k, 1);
+    }
+    return true;
+  }
+
+  function proveri(unos) {
+    var w = (unos || "").normalize("NFC").trim().toLowerCase().replace(/\s+/g, "");
+    if (!w) { javi("Prvo složi ili ukucaj reč."); return false; }
+    if (nivoZavrsen()) { javi("Nivo je završen. Idi na sledeći nivo."); return false; }
+    var L = NIVOI[st.lvl];
+    var sve = reci.concat(L.b);
+    var pogodak = null;
+    if (sve.indexOf(w) >= 0) pogodak = w;
+    else {
+      var golo = bezKvacica(w);
+      var kandidati = sve.filter(function (c) { return bezKvacica(c) === golo; });
+      pogodak = kandidati.filter(function (c) { return st.found.indexOf(c) < 0 && st.bonus.indexOf(c) < 0; })[0] || kandidati[0] || null;
+    }
+
+    if (!pogodak) {
+      var nizSlova = Array.from(w);
+      var moze = mozeOdSlova(nizSlova, slova) || mozeOdSlova(Array.from(bezKvacica(w)), Array.from(bezKvacica(slova.join(""))));
+      zvuk("greska"); vibriraj([40, 60, 40]);
+      if (nizSlova.length < 3) javi("Reč mora imati najmanje 3 slova.", "lose");
+      else if (!moze) javi("Reč " + w + " ne može da se složi od ovih slova.", "lose");
+      else javi("Reč " + w + " nije u ovom nivou.", "lose");
+      return false;
+    }
+
+    if (st.found.indexOf(pogodak) >= 0 || st.bonus.indexOf(pogodak) >= 0) {
+      zvuk("vec"); vibriraj([30, 80, 30]);
+      javi("Reč " + pogodak + " je već pronađena.");
+      return false;
+    }
+
+    if (reci.indexOf(pogodak) >= 0) {
+      st.found.push(pogodak);
+      delete st.rev[pogodak];
+      sacuvaj();
+      if (nivoZavrsen()) { zavrsiNivo(pogodak); return true; }
+      zvuk("tacno"); vibriraj(60);
+      var ostalo = reci.length - st.found.length;
+      prikaziSve();
+      javi("Tačno! " + pogodak + ". Preostalo: " + brReci(ostalo) + ".", "dobro");
+      return true;
+    }
+
+    st.bonus.push(pogodak);
+    st.hints += 1;
+    sacuvaj();
+    zvuk("bonus"); vibriraj([30, 40, 30, 40, 60]);
+    prikaziSve();
+    javi("Bonus reč: " + pogodak + "! Dobijaš jednu pomoć. Imaš " + brPomoci(st.hints) + ".", "dobro");
+    return true;
+  }
+
+  function zavrsiNivo(poslednjaRec) {
+    st.hints += 1;
+    if (st.lvl + 1 > st.max) st.max = Math.min(st.lvl + 1, NIVOI.length - 1);
+    sacuvaj();
+    izabrano = [];
+    zvuk("kraj"); vibriraj([100, 50, 100, 50, 220]);
+    prikaziSve();
+    var poruka = (poslednjaRec ? "Tačno! " + poslednjaRec + ". " : "") + $("krajNaslov").textContent + " " + $("krajTekst").textContent;
+    javi(poruka, "dobro");
+    setTimeout(function () { $("dalje").focus(); }, 120);
+  }
+
+  function sledeciNivo() {
+    if (st.lvl >= NIVOI.length - 1) st.lvl = 0;
+    else st.lvl += 1;
+    pokreniNivo(true);
+    $("hSlova").focus();
+    najaviNivo();
+  }
+
+  function najaviNivo() {
+    javi("Nivo " + (st.lvl + 1) + ". Slova: " + sriceno(st.order.map(function (i) { return slova[i]; })) +
+      ". Skrivenih reči: " + reci.length + ".");
+  }
+
+  function pomoc() {
+    if (nivoZavrsen()) { javi("Nivo je završen."); return; }
+    if (st.hints <= 0) {
+      zvuk("greska");
+      javi("Nemaš više pomoći. Pomoć dobijaš za bonus reči i za završen nivo.", "lose");
+      return;
+    }
+    var cilj = reci.filter(function (w) { return st.found.indexOf(w) < 0; })[0];
+    var s = Array.from(cilj);
+    var n = (st.rev[cilj] || 0) + 1;
+    st.hints -= 1;
+    if (n >= s.length) {
+      st.found.push(cilj);
+      delete st.rev[cilj];
+      sacuvaj();
+      if (nivoZavrsen()) { zavrsiNivo(cilj); return; }
+      zvuk("pomoc");
+      prikaziSve();
+      javi("Pomoć je otkrila celu reč: " + cilj + ". Preostalo: " + brReci(reci.length - st.found.length) + ".");
+      return;
+    }
+    st.rev[cilj] = n;
+    sacuvaj();
+    zvuk("pomoc");
+    prikaziSve();
+    javi("Pomoć: reč od " + brSlova(s.length) + " počinje sa: " + sriceno(s.slice(0, n)) + ". Preostalo pomoći: " + st.hints + ".");
+  }
+
+  function gdeSam() {
+    var ostale = reci.filter(function (w) { return st.found.indexOf(w) < 0; });
+    var t = "Nivo " + (st.lvl + 1) + " od " + NIVOI.length + ". Pronađeno " + st.found.length + " od " + brReci(reci.length) + ".";
+    if (ostale.length) {
+      var po = {};
+      ostale.forEach(function (w) { var d = Array.from(w).length; po[d] = (po[d] || 0) + 1; });
+      t += " Preostalo: " + Object.keys(po).map(function (d) {
+        return brReci(po[d]) + " od " + brSlova(+d);
+      }).join(", ") + ".";
+    }
+    t += " Bonus reči: " + st.bonus.length + ". Pomoći: " + st.hints + ".";
+    javi(t, "", true);
+  }
+
+  // ---------- događaji ----------
+  $("potvrdi").addEventListener("click", function () {
+    var r = trenutnaRec();
+    if (!r.length) { javi("Prvo dodaj slova u reč."); return; }
+    var w = r.join("");
+    var ok = proveri(w);
+    if (ok || !nivoZavrsen()) { izabrano = []; prikaziSlova(); prikaziRec(); }
+  });
+  $("obrisi").addEventListener("click", obrisiSlovo);
+  $("ponisti").addEventListener("click", function () { ponisti(false); });
+  $("forma").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var polje = $("unos");
+    proveri(polje.value);
+    polje.value = "";
+    if (!nivoZavrsen()) polje.focus();
+  });
+  $("ponoviSlova").addEventListener("click", function () {
+    javi("Slova: " + sriceno(st.order.map(function (i) { return slova[i]; })) + ".", "", true);
+  });
+  $("promesaj").addEventListener("click", function () {
+    st.order = napraviRed();
+    izabrano = [];
+    sacuvaj();
+    zvuk("mesaj");
+    prikaziSlova(); prikaziRec();
+    javi("Promešano. Slova: " + sriceno(st.order.map(function (i) { return slova[i]; })) + ".");
+  });
+  $("pomoc").addEventListener("click", pomoc);
+  $("gdeSam").addEventListener("click", gdeSam);
+  $("dalje").addEventListener("click", sledeciNivo);
+  $("zvuk").addEventListener("change", function (e) { st.sound = e.target.checked; sacuvaj(); });
+  $("vibracija").addEventListener("change", function (e) { st.vib = e.target.checked; sacuvaj(); });
+  $("jacina").value = typeof st.vol === "number" ? st.vol : 80;
+  $("jacina").setAttribute("aria-valuetext", $("jacina").value + " posto");
+  $("jacina").addEventListener("input", function (e) {
+    st.vol = +e.target.value;
+    e.target.setAttribute("aria-valuetext", st.vol + " posto");
+    sacuvaj();
+  });
+  $("jacina").addEventListener("change", function () { zvuk("tacno"); });
+  $("idiNivo").addEventListener("click", function () {
+    var n = parseInt($("izborNivoa").value, 10);
+    if (isNaN(n)) return;
+    st.lvl = n;
+    pokreniNivo(true);
+    $("hSlova").focus();
+    najaviNivo();
+  });
+  $("resetuj").addEventListener("click", function () {
+    $("potvrdaReset").hidden = false;
+    $("resetNe").focus();
+  });
+  $("resetNe").addEventListener("click", function () {
+    $("potvrdaReset").hidden = true;
+    $("resetuj").focus();
+  });
+  $("resetDa").addEventListener("click", function () {
+    var zv = st.sound, vb = st.vib;
+    st = novoStanje(); st.sound = zv; st.vib = vb;
+    $("potvrdaReset").hidden = true;
+    pokreniNivo(true);
+    $("hSlova").focus();
+    javi("Napredak je obrisan. " + "Nivo 1. Slova: " + sriceno(st.order.map(function (i) { return slova[i]; })) + ".");
+  });
+
+  pokreniNivo(false);
+
+  // Rad bez interneta na javnom sajtu
+  try {
+    if ("serviceWorker" in navigator && /github\.io$/.test(location.hostname)) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
+  } catch (e) {}
+})();
+</script>
+
+</body>
+</html>
