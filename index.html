@@ -197,7 +197,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       <p>Dodirom: dvaput dodirni slovo i ono se dodaje u reč. Kad složiš reč, dodirni dugme „Potvrdi reč”. Pogrešno slovo skidaš dugmetom „Obriši slovo”.</p>
       <p>Kucanjem: upiši reč u polje i potvrdi. Kvačice nisu obavezne, pa se „kuca” priznaje kao „kuća”.</p>
       <p>Bonus reči su sve druge prave reči od istih slova, u bilo kom obliku: padeži, množina, glagolski oblici. Igra ih prepoznaje pomoću srpskog rečnika.</p>
-      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svake 3 bonus reči i za svaki završen nivo.</p>
+      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svake 3 bonus reči i za svaki završen nivo. Kad ponovo igraš nivo koji je već pređen, nove pomoći nema.</p>
       <p>Dugme „Gde sam?” kaže nivo, koliko je reči pronađeno i koliko ti je pomoći ostalo.</p>
     </div>
   </details>
@@ -525,6 +525,15 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     prikaziSve();
   }
 
+  // Nivoi koji su već jednom pređeni: na njima nema novih pomoći
+  function vecPredjen() {
+    if (!st.zavrseni) {
+      // stariji sačuvani napredak: svi nivoi pre najdaljeg otključanog su pređeni
+      st.zavrseni = NIVOI.slice(0, st.max).map(function (L) { return L.s; });
+    }
+    return st.zavrseni.indexOf(NIVOI[st.lvl].s) >= 0;
+  }
+
   function nivoZavrsen() { return reci.every(function (w) { return st.found.indexOf(w) >= 0; }); }
 
   // ---------- prikaz ----------
@@ -641,7 +650,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     $("krajNaslov").textContent = poslednji ? "Svi nivoi su pređeni!" : "Nivo " + (st.lvl + 1) + " završen!";
     $("krajTekst").textContent = poslednji
       ? "Bravo! Uskoro stižu novi nivoi. Možeš da igraš ponovo od početka."
-      : "Bravo! Dobijaš jednu pomoć. Sada imaš " + brPomoci(st.hints) + ".";
+      : st.nagrada === false
+        ? "Bravo! Ovaj nivo je već bio pređen, pa nema nove pomoći. Imaš " + brPomoci(st.hints) + "."
+        : "Bravo! Dobijaš jednu pomoć. Sada imaš " + brPomoci(st.hints) + ".";
     $("dalje").textContent = poslednji ? "Igraj ponovo od početka" : "Sledeći nivo";
   }
 
@@ -727,6 +738,13 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
 
     // Svake 3 bonus reči donose jednu pomoć
     st.bonus.push(pogodak);
+    if (vecPredjen()) {
+      sacuvaj();
+      zvuk("bonus"); vibriraj([30, 40, 30, 40, 60]);
+      prikaziSve();
+      javi("Bonus reč: " + pogodak + "!", "dobro");
+      return true;
+    }
     st.bp = (st.bp || 0) + 1;
     var nova = st.bp % 3 === 0;
     if (nova) st.hints += 1;
@@ -741,7 +759,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   }
 
   function zavrsiNivo(poslednjaRec) {
-    st.hints += 1;
+    var nagrada = !vecPredjen();
+    if (nagrada) { st.hints += 1; st.zavrseni.push(NIVOI[st.lvl].s); }
+    st.nagrada = nagrada;
     if (st.lvl + 1 > st.max) st.max = Math.min(st.lvl + 1, NIVOI.length - 1);
     sacuvaj();
     izabrano = [];
