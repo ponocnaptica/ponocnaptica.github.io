@@ -183,6 +183,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
 
   <section aria-labelledby="hKucaj">
     <h2 id="hKucaj">Ili ukucaj reč</h2>
+    <p id="brziPoruka" class="poruka" tabindex="-1" hidden></p>
     <form id="forma" autocomplete="off">
       <label for="unos" class="sr-only">Ukucaj reč</label>
       <input type="text" id="unos" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="ukucaj reč">
@@ -234,7 +235,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     <div>
       <div class="check"><input type="checkbox" id="zvuk" aria-label="Zvukovi"><label for="zvuk" aria-hidden="true">Zvukovi</label></div>
       <label for="jacina" aria-hidden="true">Jačina zvukova</label>
-      <input type="range" id="jacina" min="10" max="100" step="10" value="80" aria-label="Jačina zvukova">
+      <input type="range" id="jacina" min="10" max="200" step="10" value="100" aria-label="Jačina zvukova">
       <label for="brziVreme">Trajanje brzog režima</label>
       <select id="brziVreme">
         <option value="60">60 sekundi</option>
@@ -1135,28 +1136,35 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   var ac = null, glavni = null;
   function pripremiZvuk() {
     ac = new (window.AudioContext || window.webkitAudioContext)();
+    // jačina -> kompresor (ujednačava) -> pojačanje -> limiter (da glasni zvukovi ne krče)
     var komp = ac.createDynamicsCompressor();
-    komp.threshold.value = -12; komp.knee.value = 6; komp.ratio.value = 4;
+    komp.threshold.value = -18; komp.knee.value = 6; komp.ratio.value = 6; komp.attack.value = 0.003; komp.release.value = 0.15;
+    var pojacanje = ac.createGain(); pojacanje.gain.value = 2.8;
+    var limiter = ac.createDynamicsCompressor();
+    limiter.threshold.value = -1; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = 0.001; limiter.release.value = 0.1;
     glavni = ac.createGain();
-    glavni.connect(komp); komp.connect(ac.destination);
+    glavni.connect(komp); komp.connect(pojacanje); pojacanje.connect(limiter); limiter.connect(ac.destination);
   }
   function ton(f, pocetak, trajanje, tip, jacina) {
-    var o = ac.createOscillator(), g = ac.createGain();
     var t = ac.currentTime + pocetak;
-    o.type = tip || "sine"; o.frequency.setValueAtTime(f, t);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(jacina || 0.18, t + 0.015);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + trajanje);
-    o.connect(g); g.connect(glavni);
-    o.start(t); o.stop(t + trajanje + 0.05);
+    // osnovni ton + viša oktava: na malim zvučnicima telefona se tako bolje čuje
+    [[f, 1], [f * 2, 0.35]].forEach(function (par) {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = tip || "sine"; o.frequency.setValueAtTime(par[0], t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime((jacina || 0.18) * par[1], t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + trajanje);
+      o.connect(g); g.connect(glavni);
+      o.start(t); o.stop(t + trajanje + 0.05);
+    });
   }
   function zvuk(vrsta) {
     if (!st.sound) return;
     try {
       if (!ac) pripremiZvuk();
       if (ac.state === "suspended") ac.resume();
-      var jacina = typeof st.vol === "number" ? st.vol : 80;
-      glavni.gain.value = (jacina / 100) * 3.5;
+      var jacina = typeof st.vol === "number" ? st.vol : 100;
+      glavni.gain.value = (jacina / 100) * 4;
       if (vrsta === "slovo") ton(660, 0, 0.07, "sine", 0.08);
       else if (vrsta === "brisi") ton(420, 0, 0.07, "sine", 0.08);
       else if (vrsta === "tacno") { ton(523, 0, 0.18); ton(659, 0.1, 0.18); ton(784, 0.2, 0.3); }
@@ -1256,6 +1264,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
          (tekuci().tema ? " · Tema: " + tekuci().tema : "")) + " · " + brPomoci(st.hints);
     $("brziDugme").textContent = uBrzom() ? "Prekini brzi režim" : "Brzi režim";
     $("dnevniDugme").hidden = uBrzom();
+    $("brziPoruka").hidden = !uBrzom();
+    if (uBrzom() && !$("brziPoruka").textContent) $("brziPoruka").textContent = "Ovde će pisati poruke o tvojim rečima.";
     prikaziSlova(); prikaziRec(); prikaziReci(); prikaziIzbor(); prikaziDostignuca();
     $("dnevniDugme").textContent = uDnevnom() ? "Nazad na nivoe"
       : st.dnevniReseno === danas() ? "Dnevni izazov: rešen, novi stiže sutra" : "Dnevni izazov: novi je spreman!";
@@ -1453,7 +1463,20 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
 
   // Rezultat provere: po podešavanju fokus ide na poruku (pouzdano za Jieshuo i slične čitače)
   function javiRez(tekst, vrsta) { javi(tekst, vrsta, st.fokus !== false); }
-  window.__javiLive = function (tekst, vrsta) { javi(tekst, vrsta, false); };
+  // Brzi režim: poruka o reči stoji odmah iznad polja za kucanje; po podešavanju fokus ide na nju (za Jieshuo),
+  // pa je jedno prevlačenje udesno vraća u polje
+  function javiBrzi(tekst, vrsta) {
+    var el = $("brziPoruka");
+    el.className = "poruka" + (vrsta ? " " + vrsta : "");
+    el.textContent = tekst;
+    if (st.fokus !== false) {
+      $("poruka").textContent = tekst;
+      el.blur();
+      setTimeout(function () { el.focus(); }, 50);
+    } else {
+      javi(tekst, vrsta, false);
+    }
+  }
 
   // ---------- brzi režim ----------
   var brziTajmer = null;
@@ -1479,6 +1502,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     st.brziS = kand[Math.floor(Math.random() * kand.length)].s;
     st.mod = "brzi"; st.brziKraj = null; st.brziGotovo = false; st.brziPoeni = 0; st.brziNovRekord = false;
     st.brziJavljeno = {};
+    $("brziPoruka").className = "poruka";
+    $("brziPoruka").textContent = "Ovde će pisati poruke o tvojim rečima.";
     vrati(null);
     pokreniNivo(true);
     $("hSlova").focus();
@@ -1526,7 +1551,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
 
   function proveri(unos) {
     // u brzom režimu fokus ostaje gde jeste, da se ne gubi vreme
-    var javi = uBrzom() ? window.__javiLive : javiRez;
+    var javi = uBrzom() ? javiBrzi : javiRez;
     if (uBrzom()) brziKreni();
     var w =(unos || "").normalize("NFC").trim().toLowerCase().replace(/\s+/g, "");
     if (!w) { javi("Prvo složi ili ukucaj reč."); return false; }
@@ -1764,7 +1789,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   $("vibracija").addEventListener("change", function (e) { st.vib = e.target.checked; sacuvaj(); });
   $("fokusPoruka").checked = st.fokus !== false;
   $("fokusPoruka").addEventListener("change", function (e) { st.fokus = e.target.checked; sacuvaj(); });
-  $("jacina").value = typeof st.vol === "number" ? st.vol : 80;
+  $("jacina").value = typeof st.vol === "number" ? st.vol : 100;
   $("jacina").setAttribute("aria-valuetext", $("jacina").value + " posto");
   $("jacina").addEventListener("input", function (e) {
     st.vol = +e.target.value;
