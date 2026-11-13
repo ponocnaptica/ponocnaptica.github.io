@@ -219,14 +219,15 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       <p>Dodirom: dvaput dodirni slovo i ono se dodaje u reč. Kad složiš reč, dodirni dugme „Potvrdi reč”. Pogrešno slovo skidaš dugmetom „Obriši slovo”.</p>
       <p>Kucanjem: upiši reč u polje i potvrdi. Kvačice nisu obavezne, pa se „kuca” priznaje kao „kuća”.</p>
       <p>Skrivene reči se biraju nasumično svaki put kad počneš nivo, pa ponovljen nivo traži nove reči. Glavna reč nivoa, ona od svih slova, uvek je među skrivenima.</p>
-      <p>U dužim nivoima krije se i zlatna reč: duga, teška reč koja nije obavezna za prelazak nivoa. Kad je nađeš, čuje se poseban zvuk i dobijaš 3 pomoći.</p>
+      <p>U dužim nivoima krije se i zlatna reč: duga, teška reč koja nije obavezna za prelazak nivoa. Kad je nađeš, čuje se poseban zvuk i dobijaš 5 poena po slovu.</p>
       <p>Bonus reči su sve druge prave reči od istih slova, u bilo kom obliku: padeži, množina, glagolski oblici. Igra ih prepoznaje pomoću srpskog rečnika.</p>
-      <p>Pomoć otkriva jedno slovo neke skrivene reči. Novu pomoć dobijaš za svake 3 bonus reči i za svaki završen nivo. Kad ponovo igraš nivo koji je već pređen, nove pomoći nema.</p>
-      <p>Dnevni izazov je poseban nivo sa puno slova koji se otključava jednom dnevno i isti je za sve igrače. Za rešen izazov dobijaš 5 pomoći. Dok igraš izazov, tvoj nivo u glavnoj igri čeka sačuvan, a dugme „Nazad na nivoe” te vraća na njega.</p>
+      <p>Poeni: skrivena reč donosi 3 poena po slovu, zlatna reč 5 poena po slovu, a bonus reč 1 poen po slovu. Kad ponovo igraš nivo koji je već pređen, reči ne donose poene.</p>
+      <p>Pomoć otkriva jedno slovo neke skrivene reči i košta 50 poena. Pomoći se nikad ne dobijaju besplatno. Kad nemaš dovoljno poena, igraš normalno, samo ne možeš da kupiš pomoć.</p>
+      <p>Dnevni izazov je poseban nivo sa puno slova koji se otključava jednom dnevno i isti je za sve igrače. Reči u izazovu donose poene kao i svuda, a za rešen izazov dobijaš još 100 poena. Dok igraš izazov, tvoj nivo u glavnoj igri čeka sačuvan, a dugme „Nazad na nivoe” te vraća na njega.</p>
       <p>Svaki deseti nivo je tematski: sve skrivene reči su na istu temu, na primer Muzika, Životinje ili Književnost. Igra na početku kaže koja je tema.</p>
       <p>Brzi režim je odvojen od glavne igre: dobiješ slova i imaš 60, 90 ili 120 sekundi da složiš što više pravih reči. Svaka reč donosi onoliko poena koliko ima slova. Vreme počinje tek kad dodaš prvo slovo ili ukucaš prvu reč. Igra javlja kad ostane 30 i 10 sekundi, a poslednjih 5 sekundi otkucava. Trajanje biraš u podešavanjima, a igra pamti tvoj rekord.</p>
       <p>Dostignuća su titule koje osvajaš za pređene nivoe, bonus reči, zlatne reči, dnevne izazove i nivoe pređene bez pomoći. Igra ti pročita titulu čim je osvojiš, a sve titule su u delu „Dostignuća”.</p>
-      <p>Dugme „Gde sam?” kaže nivo, koliko je reči pronađeno i koliko ti je pomoći ostalo.</p>
+      <p>Dugme „Gde sam?” kaže nivo, koliko je reči pronađeno i koliko imaš poena.</p>
     </div>
   </details>
 
@@ -257,7 +258,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       </div>
       <button type="button" id="resetuj">Obriši sav napredak</button>
       <div id="potvrdaReset" class="red" hidden>
-        <p>Sigurno? Brišu se svi pređeni nivoi i pomoći.</p>
+        <p>Sigurno? Brišu se svi pređeni nivoi, poeni i dostignuća.</p>
         <button type="button" id="resetDa">Da, obriši</button>
         <button type="button" id="resetNe">Odustani</button>
       </div>
@@ -1035,7 +1036,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   }
   function tekuci() { return uDnevnom() ? dnevniDanas() : uBrzom() ? brziNivo() : NIVOI[st.lvl]; }
   // Polja jedne partije; pri ulasku u dnevni izazov čuvaju se za glavnu igru
-  var POLJA = ["found", "bonus", "rev", "order", "reci", "reciNivo", "zlatnaNadjena", "nagrada", "koristioPomoc"];
+  var POLJA = ["found", "bonus", "rev", "order", "reci", "reciNivo", "zlatnaNadjena", "nagrada", "koristioPomoc", "nivoPoeni"];
   function izdvoji() { var o = {}; POLJA.forEach(function (k) { o[k] = st[k]; }); return o; }
   function vrati(o) { POLJA.forEach(function (k) { st[k] = o ? o[k] : undefined; }); }
 
@@ -1052,6 +1053,16 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     { id: "n150", k: "nivoi", n: 150, z: "Akademkinja", m: "Akademik", o: "Pređi 150 nivoa" },
     { id: "nsvi", k: "nivoi", n: NIVOI.length, z: "Živi rečnik", m: "Živi rečnik", o: "Pređi svih " + NIVOI.length + " nivoa" },
     { id: "t5", k: "teme", n: 5, z: "Znalkinja tema", m: "Znalac tema", o: "Pređi 5 tematskih nivoa" },
+    { id: "t15", t: 1, k: "teme", n: 15, z: "Hodajuća enciklopedija", m: "Hodajuća enciklopedija", o: "Pređi 15 tematskih nivoa" },
+    { id: "pe500", k: "poeni", n: 500, z: "Štediša", m: "Štediša", o: "Skupi ukupno 500 poena" },
+    { id: "pe2000", k: "poeni", n: 2000, z: "Bogatašica reči", m: "Bogataš reči", o: "Skupi ukupno 2000 poena" },
+    { id: "pe5000", k: "poeni", n: 5000, z: "Bankarka reči", m: "Bankar reči", o: "Skupi ukupno 5000 poena" },
+    { id: "pe10000", k: "poeni", n: 10000, z: "Milionerka reči", m: "Milioner reči", o: "Skupi ukupno 10000 poena" },
+    { id: "pe25000", k: "poeni", n: 25000, z: "Carica riznice", m: "Car riznice", o: "Skupi ukupno 25000 poena" },
+    { id: "nv150", k: "najNivo", n: 150, z: "Rekorderka nivoa", m: "Rekorder nivoa", o: "Skupi 150 poena u jednom nivou" },
+    { id: "nv300", t: 1, k: "najNivo", n: 300, z: "Zlatni nivo", m: "Zlatni nivo", o: "Skupi 300 poena u jednom nivou" },
+    { id: "k1", t: 1, k: "kupljene", n: 1, z: "Prva kupovina", m: "Prva kupovina", o: "Kupi prvu pomoć" },
+    { id: "k25", k: "kupljene", n: 25, z: "Verna mušterija", m: "Verni mušterija", o: "Kupi 25 pomoći" },
     { id: "br10", t: 1, k: "brzi", n: 10, z: "Brzi prsti", m: "Brzi prsti", o: "Složi 10 reči u jednoj igri brzog režima" },
     { id: "br25", t: 1, k: "brzi", n: 25, z: "Munja", m: "Munja", o: "Složi 25 reči u jednoj igri brzog režima" },
     { id: "b50", k: "bonus", n: 50, z: "Lovica na bonuse", m: "Lovac na bonuse", o: "Pronađi 50 bonus reči" },
@@ -1075,6 +1086,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     if (k === "bezPomoci") return st.bezPomoci || 0;
     if (k === "teme") return TEME.filter(function (T) { return (st.zavrseni || []).indexOf(T.s) >= 0; }).length;
     if (k === "brzi") return st.brziNajvise || 0;
+    if (k === "poeni") return st.ukPoeni || 0;
+    if (k === "kupljene") return st.kupljene || 0;
+    if (k === "najNivo") return st.najNivo || 0;
     return 0;
   }
   // Vraća tekst o novim dostignućima (ili prazno), i pamti ih
@@ -1102,7 +1116,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   function $(id) { return document.getElementById(id); }
 
   function novoStanje() {
-    return { v: 3, lvl: 0, max: 0, hints: 3, sound: true, vib: true, found: [], bonus: [], rev: {}, order: null };
+    return { v: 4, lvl: 0, max: 0, poeni: 0, sound: true, vib: true, found: [], bonus: [], rev: {}, order: null };
   }
   function ucitaj() {
     try {
@@ -1234,7 +1248,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     slova = Array.from(L.s.normalize("NFC"));
     if (novi || !st.order || st.order.length !== slova.length || (st.reciNivo && st.reciNivo !== L.s)) {
       st.found = []; st.bonus = []; st.rev = {}; st.order = napraviRed();
-      st.reci = uBrzom() ? [] : izaberiReci(L); st.reciNivo = L.s; st.zlatnaNadjena = false; st.koristioPomoc = false;
+      st.reci = uBrzom() ? [] : izaberiReci(L); st.reciNivo = L.s; st.zlatnaNadjena = false; st.koristioPomoc = false; st.nivoPoeni = 0;
     } else if (!st.reci) {
       // sačuvan napredak iz starije verzije: nastavi sa rečima koje su tada bile zadate
       st.reci = L.w.slice(); st.reciNivo = L.s;
@@ -1261,7 +1275,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   function prikaziSve() {
     $("nivoInfo").textContent = uBrzom() ? brziInfo()
       : (uDnevnom() ? "Dnevni izazov za " + danas() : "Nivo " + (st.lvl + 1) + " od " + NIVOI.length +
-         (tekuci().tema ? " · Tema: " + tekuci().tema : "")) + " · " + brPomoci(st.hints);
+         (tekuci().tema ? " · Tema: " + tekuci().tema : "")) + " · " + brPoena(st.poeni || 0);
     $("brziDugme").textContent = uBrzom() ? "Prekini brzi režim" : "Brzi režim";
     $("dnevniDugme").hidden = uBrzom();
     $("brziPoruka").hidden = !uBrzom();
@@ -1271,7 +1285,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       : st.dnevniReseno === danas() ? "Dnevni izazov: rešen, novi stiže sutra" : "Dnevni izazov: novi je spreman!";
     $("izborRoda").hidden = !!st.rod;
     $("rod").value = st.rod || "";
-    $("pomoc").textContent = "Pomoć: otkrij slovo (" + st.hints + ")";
+    $("pomoc").textContent = "Pomoć: otkrij slovo, košta " + CENA_POMOCI + " poena (imaš " + (st.poeni || 0) + ")";
     $("zvuk").checked = !!st.sound;
     $("vibracija").checked = !!st.vib;
     var gotovo = nivoZavrsen();
@@ -1408,18 +1422,18 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     if (uDnevnom()) {
       $("krajNaslov").textContent = "Dnevni izazov je rešen!";
       $("krajTekst").textContent = st.nagrada === false
-        ? "Bravo! Nagrada za današnji izazov je već dobijena. Imaš " + brPomoci(st.hints) + "."
-        : "Bravo! Dobijaš 5 pomoći. Sada imaš " + brPomoci(st.hints) + ". Novi izazov stiže sutra.";
+        ? "Bravo! Današnji izazov je već bio rešen. Imaš " + brPoena(st.poeni || 0) + "."
+        : "Bravo! Nagrada za rešen izazov je 100 poena. U izazovu si " + r("skupila", "skupio") + " " + brPoena(st.nivoPoeni || 0) +
+          ", a ukupno imaš " + brPoena(st.poeni || 0) + ". Novi izazov stiže sutra.";
       $("dalje").textContent = "Nazad na nivoe";
       return;
     }
     var poslednji = st.lvl >= NIVOI.length - 1;
     $("krajNaslov").textContent = poslednji ? "Svi nivoi su pređeni!" : "Nivo " + (st.lvl + 1) + " završen!";
-    $("krajTekst").textContent = poslednji
-      ? "Bravo! Uskoro stižu novi nivoi. Možeš da igraš ponovo od početka."
-      : st.nagrada === false
-        ? "Bravo! Ovaj nivo je već bio pređen, pa nema nove pomoći. Imaš " + brPomoci(st.hints) + "."
-        : "Bravo! Dobijaš jednu pomoć. Sada imaš " + brPomoci(st.hints) + ".";
+    $("krajTekst").textContent = (poslednji ? "Bravo! Uskoro stižu novi nivoi. Možeš da igraš ponovo od početka. " : "Bravo! ") +
+      (st.nagrada === false
+        ? "Ovaj nivo je već bio pređen, pa reči nisu donosile poene. Imaš " + brPoena(st.poeni || 0) + "."
+        : "U ovom nivou si " + r("skupila", "skupio") + " " + brPoena(st.nivoPoeni || 0) + ", a ukupno imaš " + brPoena(st.poeni || 0) + ".");
     $("dalje").textContent = poslednji ? "Igraj ponovo od početka" : "Sledeći nivo";
   }
 
@@ -1593,65 +1607,69 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       return false;
     }
 
+    var duz = Array.from(pogodak).length;
+
+    // Skrivena reč: 3 poena po slovu
     if (reci.indexOf(pogodak) >= 0) {
       st.found.push(pogodak);
       delete st.rev[pogodak];
+      var dobijeno = dodajPoene(duz * 3);
       sacuvaj();
-      if (nivoZavrsen()) { zavrsiNivo(pogodak); return true; }
+      if (nivoZavrsen()) { zavrsiNivo(pogodak, dobijeno); return true; }
       zvuk("tacno"); vibriraj(60);
       var ostalo = reci.length - st.found.length;
       prikaziSve();
-      javi("Tačno! " + pogodak + ". Preostalo: " + brReci(ostalo) + ".", "dobro");
+      javi("Tačno! " + pogodak + "." + plusPoena(dobijeno) + " Preostalo: " + brReci(ostalo) + "." + novaDostignuca(), "dobro");
       return true;
     }
 
-    // Zlatna reč: poseban zvuk i 3 pomoći (samo prvi put u tom nivou)
+    // Zlatna reč: 5 poena po slovu (prvi put u tom nivou)
     if (pogodak === L.zlatna && reci.indexOf(pogodak) < 0) {
       st.zlatnaNadjena = true;
       st.zlatne = st.zlatne || [];
       var prviPut = st.zlatne.indexOf(L.s) < 0;
-      if (prviPut) { st.zlatne.push(L.s); st.hints += 3; }
+      if (prviPut) st.zlatne.push(L.s);
+      var zl = prviPut ? dodajPoene(duz * 5) : 0;
       sacuvaj();
       zvuk("zlato"); vibriraj([80, 60, 80, 60, 80, 60, 300]);
       prikaziSve();
-      javi("Zlatna reč! " + pogodak + "! " + (prviPut
-        ? "Dobijaš 3 pomoći. Imaš " + brPomoci(st.hints) + "."
-        : "Ova zlatna reč je već bila pronađena ranije, pa nema novih pomoći.") + novaDostignuca(), "dobro");
+      javi("Zlatna reč! " + pogodak + "!" + (zl ? plusPoena(zl) + " Imaš " + brPoena(st.poeni) + "."
+        : " Ova zlatna reč je već bila pronađena ranije, pa ne donosi poene.") + novaDostignuca(), "dobro");
       return true;
     }
 
-    // Svake 3 bonus reči donose jednu pomoć
+    // Bonus reč: 1 poen po slovu
     st.bonus.push(pogodak);
     st.ukBonus = (st.ukBonus || 0) + 1;
-    var dost = novaDostignuca();
-    if (vecPredjen()) {
-      sacuvaj();
-      zvuk("bonus"); vibriraj([30, 40, 30, 40, 60]);
-      prikaziSve();
-      javi("Bonus reč: " + pogodak + "!" + dost, "dobro");
-      return true;
-    }
-    st.bp = (st.bp || 0) + 1;
-    var nova = st.bp % 3 === 0;
-    if (nova) st.hints += 1;
+    var bp = dodajPoene(duz);
     sacuvaj();
     zvuk("bonus"); vibriraj([30, 40, 30, 40, 60]);
     prikaziSve();
-    var jos = 3 - (st.bp % 3);
-    javi("Bonus reč: " + pogodak + "! " + (nova
-      ? "Dobijaš jednu pomoć. Imaš " + brPomoci(st.hints) + "."
-      : "Još " + jos + " do nove pomoći.") + dost, "dobro");
+    javi("Bonus reč: " + pogodak + "!" + plusPoena(bp) + novaDostignuca(), "dobro");
     return true;
   }
 
-  function zavrsiNivo(poslednjaRec) {
+  // ---------- poeni ----------
+  var CENA_POMOCI = 50;
+  // Dodaje poene (na već pređenom nivou reči ne donose poene); vraća koliko je dodato
+  function dodajPoene(n) {
+    if (vecPredjen()) return 0;
+    st.poeni = (st.poeni || 0) + n;
+    st.ukPoeni = (st.ukPoeni || 0) + n;
+    st.nivoPoeni = (st.nivoPoeni || 0) + n;
+    return n;
+  }
+  function plusPoena(n) { return n ? " Plus " + brPoena(n) + "." : ""; }
+
+  function zavrsiNivo(poslednjaRec, dobijeno) {
     var nagrada = !vecPredjen();
     if (uDnevnom()) {
-      if (nagrada) { st.hints += 5; st.dnevniReseno = danas(); st.dnevniBroj = (st.dnevniBroj || 0) + 1; }
+      if (nagrada) { dodajPoene(100); st.dnevniReseno = danas(); st.dnevniBroj = (st.dnevniBroj || 0) + 1; }
     } else {
-      if (nagrada) { st.hints += 1; st.zavrseni.push(tekuci().s); }
+      if (nagrada) st.zavrseni.push(tekuci().s);
       if (st.lvl + 1 > st.max) st.max = Math.min(st.lvl + 1, NIVOI.length - 1);
     }
+    if (nagrada) st.najNivo = Math.max(st.najNivo || 0, st.nivoPoeni || 0);
     if (nagrada && !st.koristioPomoc && Array.from(tekuci().s).length >= 7) st.bezPomoci = (st.bezPomoci || 0) + 1;
     st.nagrada = nagrada;
     sacuvaj();
@@ -1659,7 +1677,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     zvuk("kraj"); vibriraj([100, 50, 100, 50, 220]);
     prikaziSve();
     var Z = tekuci().zlatna;
-    var poruka = (poslednjaRec ? "Tačno! " + poslednjaRec + ". " : "") + $("krajNaslov").textContent + " " + $("krajTekst").textContent +
+    var poruka = (poslednjaRec ? "Tačno! " + poslednjaRec + "." + plusPoena(dobijeno) + " " : "") + $("krajNaslov").textContent + " " + $("krajTekst").textContent +
       (Z && !st.zlatnaNadjena ? " Zlatna reč je bila: " + Z + "." : "") + novaDostignuca();
     javi(poruka + (uDnevnom() ? " Dugme za povratak na nivoe je odmah ispod." : " Dugme za sledeći nivo je odmah ispod."), "dobro", true);
   }
@@ -1677,7 +1695,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     pokreniNivo(nov);
     $("hSlova").focus();
     javi("Dnevni izazov! Slova: " + sriceno(st.order.map(function (i) { return slova[i]; })) +
-      ". Skrivenih reči: " + reci.length + ". Nagrada za rešen izazov je 5 pomoći." +
+      ". Skrivenih reči: " + reci.length + ". Nagrada za rešen izazov je 100 poena." +
       (tekuci().zlatna ? " Krije se i zlatna reč od " + brSlova(Array.from(tekuci().zlatna).length) + "." : ""), "", true);
   }
   function izadjiIzDnevnog(tiho) {
@@ -1711,15 +1729,16 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     var javi = javiRez;
     if (uBrzom()) { javi("Pomoć ne radi u brzom režimu."); return; }
     if (nivoZavrsen()) { javi("Nivo je završen."); return; }
-    if (st.hints <= 0) {
+    if ((st.poeni || 0) < CENA_POMOCI) {
       zvuk("greska");
-      javi("Nemaš više pomoći. Pomoć dobijaš za svake 3 bonus reči i za završen nivo.", "lose");
+      javi("Za pomoć ti treba " + brPoena(CENA_POMOCI) + ", a imaš " + brPoena(st.poeni || 0) + ". Poene skupljaš rečima.", "lose");
       return;
     }
     var cilj = reci.filter(function (w) { return st.found.indexOf(w) < 0; })[0];
     var s = Array.from(cilj);
     var n = (st.rev[cilj] || 0) + 1;
-    st.hints -= 1;
+    st.poeni -= CENA_POMOCI;
+    st.kupljene = (st.kupljene || 0) + 1;
     st.koristioPomoc = true;
     if (n >= s.length) {
       st.found.push(cilj);
@@ -1728,14 +1747,14 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
       if (nivoZavrsen()) { zavrsiNivo(cilj); return; }
       zvuk("pomoc");
       prikaziSve();
-      javi("Pomoć je otkrila celu reč: " + cilj + ". Preostalo: " + brReci(reci.length - st.found.length) + ".");
+      javi("Pomoć je otkrila celu reč: " + cilj + ". Preostalo: " + brReci(reci.length - st.found.length) + ". Ostalo ti je " + brPoena(st.poeni) + "." + novaDostignuca());
       return;
     }
     st.rev[cilj] = n;
     sacuvaj();
     zvuk("pomoc");
     prikaziSve();
-    javi("Pomoć: reč od " + brSlova(s.length) + " počinje sa: " + sriceno(s.slice(0, n)) + ". Preostalo pomoći: " + st.hints + ".");
+    javi("Pomoć: reč od " + brSlova(s.length) + " počinje sa: " + sriceno(s.slice(0, n)) + ". Pomoć je koštala " + brPoena(CENA_POMOCI) + ", ostalo ti je " + brPoena(st.poeni) + "." + novaDostignuca());
   }
 
   function gdeSam() {
@@ -1749,7 +1768,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
         return brReci(po[d]) + " od " + brSlova(+d);
       }).join(", ") + ".";
     }
-    t += " Bonus reči: " + st.bonus.length + ". Pomoći: " + st.hints + ".";
+    t += " Bonus reči: " + st.bonus.length + ". Poeni: " + (st.poeni || 0) + ". Pomoć košta " + CENA_POMOCI + ".";
     javi(t, "", true);
   }
 
@@ -1854,6 +1873,15 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     if (i < 0) st.lvl = Math.min(st.max, stariNivo + Math.floor(stariNivo / 9));
     st.v = 3;
     sacuvaj();
+  }
+  // Novo bodovanje (verzija 4): svi kreću od 0 poena i 0 pomoći, pređeni nivoi ostaju
+  if (st.v < 4) {
+    st.hints = 0; st.poeni = 0; st.ukPoeni = 0; st.nivoPoeni = 0; st.bp = 0;
+    st.v = 4;
+    sacuvaj();
+    setTimeout(function () {
+      javi("Novo u igri: poeni! Skrivena reč donosi 3 poena po slovu, zlatna 5, a bonus reč 1 poen po slovu. Pomoć košta 50 poena. Svi kreću od nule. Srećno!", "", true);
+    }, 600);
   }
   // Ako je dnevni izazov ostao otvoren od juče, vrati se na nivoe; brzi režim se ne nastavlja posle zatvaranja
   if (uDnevnom() && st.reciNivo !== dnevniDanas().s) { izadjiIzDnevnog(true); st.dnevno = null; }
