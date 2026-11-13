@@ -1259,7 +1259,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   function $(id) { return document.getElementById(id); }
 
   function novoStanje() {
-    return { v: 4, lvl: 0, max: 0, poeni: 0, sound: true, vib: true, found: [], bonus: [], rev: {}, order: null };
+    return { v: 5, lvl: 0, max: 0, poeni: 0, sound: true, vib: true, found: [], bonus: [], rev: {}, order: null };
   }
   function ucitaj() {
     try {
@@ -2174,6 +2174,23 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
     setTimeout(function () {
       javi("Novo u igri: poeni! Skrivena reč donosi 3 poena po slovu, zlatna 5, a bonus reč 1 poen po slovu. Pomoć košta 50 poena. Svi kreću od nule. Srećno!", "", true);
     }, 600);
+  }
+  // Verzija 5: statistika iz nivoa pređenih pre novog bodovanja (skrivene reči i najduža reč)
+  if (st.v < 5) {
+    if (!st.zavrseni) st.zavrseni = NIVOI.slice(0, st.max).map(function (L) { return L.s; });
+    var zbirReci = 0, najduza = st.najduza || "";
+    (st.zavrseni || []).forEach(function (s) {
+      var L = null;
+      for (var i = 0; i < NIVOI.length; i++) if (NIVOI[i].s === s) { L = NIVOI[i]; break; }
+      if (!L || L.brzi) return;
+      var spisak = L.tema ? L.w : [L.glavna || L.s];
+      zbirReci += L.tema ? L.w.length : brojSkrivenih(L);
+      spisak.forEach(function (w) { if (w && tok(w).length > tok(najduza).length) najduza = w; });
+    });
+    if (zbirReci > (st.ukReci || 0)) st.ukReci = zbirReci;
+    if (najduza) st.najduza = najduza;
+    st.v = 5;
+    sacuvaj();
   }
   // Ako je dnevni izazov ostao otvoren od juče, vrati se na nivoe; brzi režim se ne nastavlja posle zatvaranja
   if (uDnevnom() && st.reciNivo !== dnevniDanas().s) { izadjiIzDnevnog(true); st.dnevno = null; }
