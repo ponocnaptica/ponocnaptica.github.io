@@ -59,6 +59,7 @@ p { margin: 0; }
 }
 header { display: flex; flex-direction: column; gap: 4px; }
 .nivo { color: var(--muted); font-variant-numeric: tabular-nums; }
+.poeni { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .poruka {
   min-height: 3.2em; padding: 12px 14px; border-radius: 10px;
   background: var(--surface); border: 2px solid var(--line); font-weight: 700;
@@ -138,6 +139,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
 <main>
   <header>
     <h1>Složi reč</h1>
+    <p class="poeni" id="poeniInfo">Poeni: 0</p>
     <p class="nivo" id="nivoInfo">Nivo 1</p>
   </header>
 
@@ -1417,7 +1419,9 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   function prikaziSve() {
     $("nivoInfo").textContent = uBrzom() ? brziInfo()
       : (uDnevnom() ? "Dnevni izazov za " + lepDatum(danas()) : "Nivo " + (st.lvl + 1) + " od " + NIVOI.length +
-         (tekuci().tema ? " · Tema: " + tekuci().tema : "")) + " · " + brPoena(st.poeni || 0);
+         (tekuci().tema ? " · Tema: " + tekuci().tema : ""));
+    // Trenutni poeni uvek na vrhu ekrana (u brzom režimu: poeni glavne igre)
+    $("poeniInfo").textContent = (uBrzom() ? "Poeni u glavnoj igri: " : "Poeni: ") + (st.poeni || 0);
     $("brziDugme").textContent = uBrzom() ? "Prekini brzi režim" : "Brzi režim";
     $("dnevniDugme").hidden = uBrzom();
     $("brziPoruka").hidden = !uBrzom();
