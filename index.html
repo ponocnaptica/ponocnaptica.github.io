@@ -1137,8 +1137,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   }
   // Trenutni niz: važi ako je izazov rešen danas ili juče
   function nizSad() { return (st.nizDatum === danas() || st.nizDatum === juce()) ? (st.niz || 0) : 0; }
-  // "2026-11-13" -> "13. novembra 2026."
-  var MESECI = ["januara", "februara", "marta", "aprila", "maja", "juna", "jula", "avgusta", "septembra", "oktobra", "novembra", "decembra"];
+  // "2026-11-13" -> "13. novembar 2026."
+  var MESECI = ["januar", "februar", "mart", "april", "maj", "jun", "jul", "avgust", "septembar", "oktobar", "novembar", "decembar"];
   function lepDatum(iso) { var d = iso.split("-"); return (+d[2]) + ". " + MESECI[+d[1] - 1] + " " + d[0] + "."; }
   function brDana(n) { return n + " " + oblik(n, "dan", "dana", "dana"); }
   // Tekst za deljenje: bez reči iz izazova, da se drugima ne pokvari
