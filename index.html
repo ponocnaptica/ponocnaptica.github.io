@@ -1137,12 +1137,14 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   }
   // Trenutni niz: važi ako je izazov rešen danas ili juče
   function nizSad() { return (st.nizDatum === danas() || st.nizDatum === juce()) ? (st.niz || 0) : 0; }
+  // "2026-11-13" -> "13. novembra 2026."
+  var MESECI = ["januara", "februara", "marta", "aprila", "maja", "juna", "jula", "avgusta", "septembra", "oktobra", "novembra", "decembra"];
+  function lepDatum(iso) { var d = iso.split("-"); return (+d[2]) + ". " + MESECI[+d[1] - 1] + " " + d[0] + "."; }
   function brDana(n) { return n + " " + oblik(n, "dan", "dana", "dana"); }
   // Tekst za deljenje: bez reči iz izazova, da se drugima ne pokvari
   function tekstRezultata() {
     var R = st.dnevniRez; if (!R) return "";
-    var d = R.datum.split("-");
-    var t = "Složi reč, dnevni izazov " + (+d[2]) + ". " + (+d[1]) + ". " + d[0] + ".: " + R.nadjeno + " od " + R.ukupno + " skrivenih reči" +
+    var t = "Složi reč, dnevni izazov za " + lepDatum(R.datum) + " Rezultat: " + R.nadjeno + " od " + R.ukupno + " skrivenih reči" +
       (R.imaZlatnu ? (R.zlatna ? ", zlatna reč pronađena" : ", zlatna reč nije pronađena") : "") +
       ", " + brReci(R.bonus).replace(/reč(i)?$/, "bonus reč$1") + ", " + brPoena(R.poeni) +
       (R.pomoc ? ", uz pomoć" : ", bez pomoći") + (R.niz > 1 ? ". Niz: " + brDana(R.niz) + " zaredom" : "") + ". Igraj i ti: https://ponocnaptica.github.io";
@@ -1414,7 +1416,7 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   // ---------- prikaz ----------
   function prikaziSve() {
     $("nivoInfo").textContent = uBrzom() ? brziInfo()
-      : (uDnevnom() ? "Dnevni izazov za " + danas() : "Nivo " + (st.lvl + 1) + " od " + NIVOI.length +
+      : (uDnevnom() ? "Dnevni izazov za " + lepDatum(danas()) : "Nivo " + (st.lvl + 1) + " od " + NIVOI.length +
          (tekuci().tema ? " · Tema: " + tekuci().tema : "")) + " · " + brPoena(st.poeni || 0);
     $("brziDugme").textContent = uBrzom() ? "Prekini brzi režim" : "Brzi režim";
     $("dnevniDugme").hidden = uBrzom();
