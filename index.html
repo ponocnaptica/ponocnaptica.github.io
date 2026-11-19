@@ -2199,6 +2199,8 @@ input[type="range"] { width: 100%; min-height: 48px; accent-color: var(--accent)
   // Samo za proveru na računaru (fajl otvoren lokalno): koje su reči zadate
   if (location.protocol === "file:" || location.protocol === "data:" || location.hostname === "localhost") window.__proba = function () { return { reci: reci, zlatna: tekuci().zlatna, nivo: tekuci().s, st: st }; };
 
+  // Zamoli pregledač (naročito Safari na iPhone-u) da ne briše sačuvani napredak
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {}
   // Rad bez interneta na javnom sajtu
   try {
     if ("serviceWorker" in navigator && /github\.io$/.test(location.hostname)) {
